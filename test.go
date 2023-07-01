@@ -1,15 +1,10 @@
 package main
 
-// import (
-// 	"Users/diggi/Documents/Go_tutorials/models"
-// 	"fmt"
-// )
+// type Test struct {
+// 	Name  string  `gorm:"column:name"`
+// 	Price float64 `gorm:"column:price"`
+// }
 
 // func main() {
-// 	users := []models.AddProductCategory{}
-// 	fmt.Println(users)
-// 	for _, row := range users {
-// 		data := append(users,)
-// 		fmt.Println(row)
-// 	}
+// 	myTest := Test{"Degraft", 1}
 // }

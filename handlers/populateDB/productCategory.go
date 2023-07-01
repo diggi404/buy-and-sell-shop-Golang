@@ -9,7 +9,7 @@ import (
 )
 
 func AddProductCategory(req *fiber.Ctx) error {
-	var reqBody models.ValidateProductCategory
+	var reqBody models.AddProductCategory
 	var categoryContent []models.ProductCategory
 	if err := req.BodyParser(&reqBody); err != nil {
 		return err
@@ -28,4 +28,15 @@ func AddProductCategory(req *fiber.Ctx) error {
 	return req.Status(201).JSON(fiber.Map{
 		"msg": "categories have been added!",
 	})
+}
+
+func GetCategories(req *fiber.Ctx) error {
+	var categories []models.ProductCategory
+	queryCategories := handlers.DB.Find(&categories)
+	if queryCategories.Error != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "no records found!",
+		})
+	}
+	return req.Status(201).JSON(categories)
 }

@@ -31,14 +31,23 @@ type UpdateAddressBook struct {
 	ZipCode   string `json:"zip_code" validate:"min=5,max=5"`
 }
 
-type AddProductCategory struct {
-	Name string `json:"name"`
-}
+// type AddProductCategory struct {
+// 	Name string `json:"name"`
+// }
 
-type ValidateProductCategory struct {
+type AddProductCategory struct {
 	Categories []ProductCategory `json:"categories"`
 }
 
-type ValidateCategoryOptions struct {
+type AddCategoryOptions struct {
 	Options []CategoryOptions `json:"options" validate:"dive"`
+}
+
+type AddProduct struct {
+	UserId           uint    `json:"user_id"`
+	ProductName      string  `json:"product_name" validate:"required"`
+	Categoryid       uint    `json:"category_id" validate:"required"`
+	ProductBrand     string  `json:"product_brand" validate:"required"`
+	ProductCondition string  `json:"product_condition" validate:"required"`
+	Price            float32 `json:"price" validate:"required"`
 }

@@ -33,10 +33,9 @@ type ProductCategory struct {
 }
 
 type CategoryOptions struct {
-	CategoryID       uint            `json:"category_id" validate:"required" gorm:"column:category_id"`
-	ProductCategory  ProductCategory `gorm:"foreignKey:CategoryID"`
-	ProductBrand     string          `json:"product_brand" validate:"required" gorm:"varchar(255);not null; column:product_brand"`
-	ProductCondition string          `json:"product_condition" validate:"required" gorm:"varchar(255);not null; conlumn:product_condition"`
+	CategoryID      uint            `json:"category_id" validate:"required" gorm:"column:category_id"`
+	ProductCategory ProductCategory `gorm:"foreignKey:CategoryID"`
+	ProductBrand    string          `json:"product_brand" validate:"required" gorm:"varchar(255);not null; column:product_brand"`
 }
 
 type Products struct {
@@ -44,8 +43,9 @@ type Products struct {
 	User             User            `gorm:"foreignKey:UserID"`
 	ProductID        uint            `gorm:"primaryKey;autoIncrement"`
 	ProductName      string          `gorm:"varchar(255);not null"`
-	Categoryid       string          `gorm:"column:category_id"`
+	Categoryid       uint            `gorm:"column:category_id"`
 	ProductCategory  ProductCategory `gorm:"foreignKey:Categoryid"`
 	ProductBrand     string          `gorm:"varchar(255);not null; column:product_brand"`
 	ProductCondition string          `gorm:"varchar(255);not null; conlumn:product_condition"`
+	Price            float32         `gorm:"not null; column:price"`
 }

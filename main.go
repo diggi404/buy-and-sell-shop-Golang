@@ -3,6 +3,7 @@ package main
 import (
 	"Users/diggi/Documents/Go_tutorials/handlers"
 	populatedb "Users/diggi/Documents/Go_tutorials/handlers/populateDB"
+	"Users/diggi/Documents/Go_tutorials/models"
 	"Users/diggi/Documents/Go_tutorials/validation"
 	"fmt"
 	"log"
@@ -26,6 +27,7 @@ func main() {
 		fmt.Println(err.Error())
 		panic("failed to connect database!")
 	}
+	db.Debug().AutoMigrate(&models.CategoryOptions{})
 	handlers.DB = db
 	app.Post("/auth/login", handlers.Login)
 	app.Post("/signup", handlers.Signup)
@@ -33,7 +35,10 @@ func main() {
 	app.Post("/user/create/address", validation.Authenticator, handlers.CreteAddressBook)
 	app.Put("/user/update/address/:address_id", validation.Authenticator, handlers.UpdateAddressBook)
 	app.Post("/create/category", validation.Authenticator, populatedb.AddProductCategory)
+	app.Get("/categories", validation.Authenticator, populatedb.GetCategories)
 	app.Post("/create/options", validation.Authenticator, populatedb.AddCategoryOptions)
+	app.Get("/options/:category_id", validation.Authenticator, populatedb.GetCategoryOptions)
+	app.Post("/user/create/item", validation.Authenticator, handlers.PostItem)
 
 	app.Listen(":3000")
 }

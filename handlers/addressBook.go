@@ -31,7 +31,15 @@ func CreteAddressBook(req *fiber.Ctx) error {
 			"msg": "you have reached your addressBook limit!",
 		})
 	} else {
-		addressContent := &models.AddressBook{UserId: uint(validation.DecodedToken["id"].(float64)), FirstName: reqBody.FirstName, LastName: reqBody.LastName, Address1: reqBody.Address1, City: reqBody.City, State: reqBody.State, ZipCode: reqBody.ZipCode}
+		addressContent := &models.AddressBook{
+			UserId:    uint(validation.DecodedToken["id"].(float64)),
+			FirstName: reqBody.FirstName,
+			LastName:  reqBody.LastName,
+			Address1:  reqBody.Address1,
+			City:      reqBody.City,
+			State:     reqBody.State,
+			ZipCode:   reqBody.ZipCode,
+		}
 		registerAdressBook := DB.Create(&addressContent)
 		if registerAdressBook.Error != nil {
 			return req.Status(400).JSON(fiber.Map{
