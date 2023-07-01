@@ -28,8 +28,3 @@ func verifyJwt(jwtToken string) (jwt.MapClaims, error) {
 		return nil, err
 	}
 }
-
-// func main() {
-// 	claims, _ := verifyJwt("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRpZ2dpNDA0QGdtYWlsLmNvbSIsInVzZXJfaWQiOjF9.aF9WcYKYly6ZKdk4Wq69hpOW11UEGmSnycjzJqyIt6U")
-// 	fmt.Println(claims["email"])
-// }

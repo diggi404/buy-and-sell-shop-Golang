@@ -20,7 +20,9 @@ func CreteAddressBook(req *fiber.Ctx) error {
 	if errors != nil {
 		return req.Status(400).JSON(errors)
 	}
-	checkCount := DB.Where(&models.AddressBook{UserId: uint(validation.DecodedToken["id"].(float64))}).Find(&addressBook)
+	checkCount := DB.Where(
+		&models.AddressBook{UserId: uint(validation.DecodedToken["id"].(float64))}).
+		Find(&addressBook)
 	if checkCount.Error != nil {
 		return req.Status(401).JSON(fiber.Map{
 			"msg": "an error occurred!",
@@ -78,7 +80,15 @@ func UpdateAddressBook(req *fiber.Ctx) error {
 			"msg": "address cannot be found!",
 		})
 	} else {
-		addressContent := &models.AddressBook{AddressId: addressId, UserId: uint(validation.DecodedToken["id"].(float64)), FirstName: reqBody.FirstName, LastName: reqBody.LastName, Address1: reqBody.Address1, City: reqBody.City, State: reqBody.State, ZipCode: reqBody.ZipCode}
+		addressContent := &models.AddressBook{
+			AddressId: addressId,
+			UserId:    uint(validation.DecodedToken["id"].(float64)),
+			FirstName: reqBody.FirstName,
+			LastName:  reqBody.LastName,
+			Address1:  reqBody.Address1,
+			City:      reqBody.City,
+			State:     reqBody.State,
+			ZipCode:   reqBody.ZipCode}
 		updateAddress := DB.Model(&addressBook).Updates(addressContent)
 		if updateAddress.Error != nil {
 			return req.Status(400).JSON(fiber.Map{
@@ -93,7 +103,9 @@ func UpdateAddressBook(req *fiber.Ctx) error {
 
 func GetAddressBook(req *fiber.Ctx) error {
 	var addressList []models.AddressBook
-	getAddress := DB.Where(&models.AddressBook{UserId: uint(validation.DecodedToken["id"].(float64))}).Find(&addressList)
+	getAddress := DB.Where(
+		&models.AddressBook{UserId: uint(validation.DecodedToken["id"].(float64))}).
+		Find(&addressList)
 	if getAddress.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "an error occurred!",
