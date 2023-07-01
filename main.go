@@ -5,6 +5,7 @@ import (
 	"Users/diggi/Documents/Go_tutorials/models"
 	"Users/diggi/Documents/Go_tutorials/validation"
 	"fmt"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/driver/postgres"
@@ -12,8 +13,9 @@ import (
 )
 
 func main() {
+
 	app := fiber.New()
-	dsn := "host=localhost user=postgres password=Simplepass1@ dbname=go_test port=5432 sslmode=disable"
+	dsn := "host=" + os.Getenv("DB_HOST") + "user=" + os.Getenv("DB_USERNAME") + "password=" + os.Getenv("DB_PASSWORD") + "dbname=" + os.Getenv("DB_NAME") + "port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.New(postgres.Config{DSN: dsn, PreferSimpleProtocol: true}), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err.Error())
