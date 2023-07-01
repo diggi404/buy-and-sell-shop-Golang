@@ -1,17 +1,15 @@
 package main
 
 // import (
+// 	"Users/diggi/Documents/Go_tutorials/models"
 // 	"fmt"
-// 	"log"
-// 	"os"
 // )
 
 // func main() {
-// 	data, err := os.ReadFile("test.txt")
-// 	if err != nil {
-// 		if os.IsNotExist(err) {
-// 			log.Fatal("file does not exists!")
-// 		}
+// 	users := []models.AddProductCategory{}
+// 	fmt.Println(users)
+// 	for _, row := range users {
+// 		data := append(users,)
+// 		fmt.Println(row)
 // 	}
-// 	fmt.Println(string(data))
 // }

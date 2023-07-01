@@ -21,3 +21,24 @@ type CreateAddressBook struct {
 	State     string `json:"state" validate:"required,min=2,max=2"`
 	ZipCode   string `json:"zip_code" validate:"required,min=5,max=5"`
 }
+
+type UpdateAddressBook struct {
+	FirstName string `json:"fname"`
+	LastName  string `json:"lname"`
+	Address1  string `json:"address1"`
+	City      string `json:"city"`
+	State     string `json:"state" validate:"min=2,max=2"`
+	ZipCode   string `json:"zip_code" validate:"min=5,max=5"`
+}
+
+type AddProductCategory struct {
+	Name string `json:"name"`
+}
+
+type ValidateProductCategory struct {
+	Categories []ProductCategory `json:"categories"`
+}
+
+type ValidateCategoryOptions struct {
+	Options []CategoryOptions `json:"options" validate:"dive"`
+}
