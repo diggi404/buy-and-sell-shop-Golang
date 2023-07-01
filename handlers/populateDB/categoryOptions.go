@@ -47,6 +47,11 @@ func GetCategoryOptions(req *fiber.Ctx) error {
 	getOptions := handlers.DB.Where(&query).Find(&options)
 	if getOptions.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
+			"msg": "an error occurred!",
+		})
+	}
+	if getOptions.RowsAffected == 0 {
+		return req.Status(400).JSON(fiber.Map{
 			"msg": "no records found!",
 		})
 	}

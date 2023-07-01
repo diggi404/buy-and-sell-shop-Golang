@@ -16,7 +16,6 @@ type CreateAddressBook struct {
 	FirstName string `json:"fname" validate:"required"`
 	LastName  string `json:"lname" validate:"required"`
 	Address1  string `json:"address1" validate:"required"`
-	Address2  string `json:"adress2"`
 	City      string `json:"city" validate:"required"`
 	State     string `json:"state" validate:"required,min=2,max=2"`
 	ZipCode   string `json:"zip_code" validate:"required,min=5,max=5"`
@@ -44,10 +43,12 @@ type AddCategoryOptions struct {
 }
 
 type AddProduct struct {
-	UserId           uint    `json:"user_id"`
 	ProductName      string  `json:"product_name" validate:"required"`
 	Categoryid       uint    `json:"category_id" validate:"required"`
 	ProductBrand     string  `json:"product_brand" validate:"required"`
 	ProductCondition string  `json:"product_condition" validate:"required"`
+	ShoeSize         float32 `json:"shoe_size" gorm:"column:shoe_size"`
+	ClothSize        string  `json:"cloth_size" gorm:"varchar(50); column:cloth_size"`
+	Color            string  `json:"color" gorm:"varchar(100); column:color"`
 	Price            float32 `json:"price" validate:"required"`
 }

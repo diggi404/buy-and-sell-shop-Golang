@@ -90,3 +90,19 @@ func UpdateAddressBook(req *fiber.Ctx) error {
 		})
 	}
 }
+
+func GetAddressBook(req *fiber.Ctx) error {
+	var addressList []models.AddressBook
+	getAddress := DB.Where(&models.AddressBook{UserId: uint(validation.DecodedToken["id"].(float64))}).Find(&addressList)
+	if getAddress.Error != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "an error occurred!",
+		})
+	}
+	if getAddress.RowsAffected == 0 {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "no records found!",
+		})
+	}
+	return req.Status(201).JSON(addressList)
+}
