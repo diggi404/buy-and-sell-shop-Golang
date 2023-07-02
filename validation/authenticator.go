@@ -21,14 +21,14 @@ func Authenticator(req *fiber.Ctx) error {
 		rawToken := headers["Authorization"]
 		headerToken := strings.Split(rawToken, " ")
 		token, err := verifyJwt(headerToken[1])
-		if err != nil {
-			fmt.Println(err)
-			return req.Status(401).JSON(fiber.Map{
-				"msg": "user authentication failed!",
-			})
-		} else {
+		if err == nil {
 			DecodedToken = token
 			return req.Next()
 		}
+
+		fmt.Println(err)
+		return req.Status(401).JSON(fiber.Map{
+			"msg": "user authentication failed!",
+		})
 	}
 }

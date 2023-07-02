@@ -67,8 +67,8 @@ func DeleteProduct(req *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	product_id := uint(num)
-	deleteItem := DB.Delete(&models.Products{}, product_id)
+	productId := uint(num)
+	deleteItem := DB.Delete(&models.Products{}, productId)
 	if deleteItem.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "error deleting product!",
