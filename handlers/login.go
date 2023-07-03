@@ -3,16 +3,23 @@ package handlers
 import (
 	"Users/diggi/Documents/Go_tutorials/models"
 	"Users/diggi/Documents/Go_tutorials/validation"
+	"log"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
 func Login(req *fiber.Ctx) error {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("error loading .env file!")
+	}
 	authUser := new(models.User)
 	reqBody := new(models.LoginSchema)
 	if err := req.BodyParser(reqBody); err != nil {
@@ -39,7 +46,7 @@ func Login(req *fiber.Ctx) error {
 		"email": authUser.Email,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}
-	token, err := validation.GenerateJwt("fadfadsfasf", payload)
+	token, err := validation.GenerateJwt(os.Getenv("SECRET_KEY"), payload)
 	if err != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "error generating token!",
