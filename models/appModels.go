@@ -52,3 +52,13 @@ type AddProduct struct {
 	Color            string  `json:"color" gorm:"varchar(100); column:color"`
 	Price            float32 `json:"price" validate:"required"`
 }
+
+type ProductList struct {
+	Products []Cart
+}
+
+type CartResponse struct {
+	CartId     uint
+	TotalPrice float32
+	Items      []Cart
+}

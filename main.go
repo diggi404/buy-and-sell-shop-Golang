@@ -26,8 +26,9 @@ func main() {
 		fmt.Println(err.Error())
 		panic("failed to connect database!")
 	}
-	// db.Debug().AutoMigrate(&models.User{}, &models.AddressBook{}, &models.CategoryOptions{}, &models.Products{}, &models.ProductCategory{})
+	// db.Debug().AutoMigrate(&models.User{}, &models.AddressBook{}, &models.CategoryOptions{}, &models.Products{}, &models.ProductCategory{}, &models.Cart{})
 	// db.Debug().AutoMigrate(&models.Products{}, &models.Cart{})
+	// db.Debug().AutoMigrate(&models.User{}, &models.Cart{})
 	handlers.DB = db
 	app.Post("/auth/login", handlers.Login)
 	app.Post("/signup", handlers.Signup)
@@ -44,7 +45,7 @@ func main() {
 	app.Delete("/user/item/:product_id", validation.Authenticator, handlers.DeleteProduct)
 	app.Post("/user/create/cart/:product_id", validation.Authenticator, handlers.AddToCart)
 	app.Get("/user/cart", validation.Authenticator, handlers.GetCart)
-	app.Delete("/user/cart/:cart_id")
+	app.Delete("/user/cart/:product_id", validation.Authenticator, handlers.DeleteCartItem)
 	app.Post("/user/create/credit_card", validation.Authenticator, handlers.AddCreditCard)
 	app.Delete("/user/payments/:card_id", validation.Authenticator, handlers.DeleteCrediCard)
 

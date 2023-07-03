@@ -19,8 +19,8 @@ func Signup(req *fiber.Ctx) error {
 	}
 	checkUser := DB.Where(&models.User{Email: reqBody.Email}).First(&models.User{})
 	if checkUser.Error != nil {
-		bytes, _ := validation.HashPassword(reqBody.Password)
-		results := DB.Create(&models.User{Name: reqBody.Name, Email: reqBody.Email, Password: bytes})
+		hash, _ := validation.HashPassword(reqBody.Password)
+		results := DB.Create(&models.User{Name: reqBody.Name, Email: reqBody.Email, Password: hash})
 		if results.Error != nil {
 			return req.Status(400).JSON(fiber.Map{
 				"msg": "signup failed!",

@@ -51,7 +51,7 @@ func GetUserProducts(req *fiber.Ctx) error {
 	}
 	if getProducts.RowsAffected == 0 {
 		return req.Status(400).JSON(fiber.Map{
-			"msg": "no records found!",
+			"msg": "no products found!",
 		})
 	}
 	return req.Status(201).JSON(products)
@@ -68,15 +68,18 @@ func DeleteProduct(req *fiber.Ctx) error {
 		return err
 	}
 	productId := uint(num)
-	deleteItem := DB.Delete(&models.Products{}, productId)
-	if deleteItem.Error != nil {
+	deleteItem := DB.
+		Where(&models.Products{UserID: uint(validation.DecodedToken["id"].(float64)), ProductID: productId}).
+		Delete(&models.Products{})
+	if deleteItem.RowsAffected == 0 {
 		return req.Status(400).JSON(fiber.Map{
-			"msg": "error deleting product!",
+			"msg": "the product does not exists!",
 		})
 	}
 	return req.Status(201).JSON(fiber.Map{
 		"msg": "product has been deleted successfully!",
 	})
+
 }
 
 // func UpdateProduct(req *fiber.Ctx) error {
