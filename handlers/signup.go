@@ -3,11 +3,14 @@ package handlers
 import (
 	"Users/diggi/Documents/Go_tutorials/models"
 	"Users/diggi/Documents/Go_tutorials/validation"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func Signup(req *fiber.Ctx) error {
+	authUser := new(models.User)
 	reqBody := new(models.SignupSchema)
 	if err := req.BodyParser(reqBody); err != nil {
 		return err
@@ -26,8 +29,19 @@ func Signup(req *fiber.Ctx) error {
 				"msg": "signup failed!",
 			})
 		}
+		payload := &jwt.MapClaims{
+			"id":    authUser.ID,
+			"email": authUser.Email,
+			"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		}
+		token, err := validation.GenerateJwt("fadfadsfasf", payload)
+		if err != nil {
+			return req.Status(400).JSON(fiber.Map{
+				"msg": "error generating token!",
+			})
+		}
 		return req.Status(201).JSON(fiber.Map{
-			"msg": "Welcome to Golang!",
+			"access_token": token,
 		})
 	}
 	return req.Status(400).JSON(fiber.Map{
