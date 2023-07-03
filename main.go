@@ -42,6 +42,7 @@ func main() {
 	app.Get("/options/:category_id", validation.Authenticator, populatedb.GetCategoryOptions)
 	app.Post("/user/create/item", validation.Authenticator, handlers.PostItem)
 	app.Get("/user/items", validation.Authenticator, handlers.GetUserProducts)
+	app.Get("/products/all", validation.Authenticator, handlers.GetAllProducts)
 	app.Delete("/user/item/:product_id", validation.Authenticator, handlers.DeleteProduct)
 	app.Post("/user/create/cart/:product_id", validation.Authenticator, handlers.AddToCart)
 	app.Get("/user/cart", validation.Authenticator, handlers.GetCart)

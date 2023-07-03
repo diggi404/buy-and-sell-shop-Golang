@@ -82,35 +82,13 @@ func DeleteProduct(req *fiber.Ctx) error {
 
 }
 
-// func UpdateProduct(req *fiber.Ctx) error {
-// 	if len(req.Params("product_id")) == 0 {
-// 		return req.Status(400).JSON(fiber.Map{
-// 			"msg": "product_id is required!",
-// 		})
-// 	}
-// 	num, err := strconv.ParseUint(req.Params("product_id"), 10, 32)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	product_id := uint(num)
-// 	reqBody := new(models.AddProduct)
-// 	if err := req.BodyParser(reqBody); err != nil {
-// 		return err
-// 	}
-// 	errors := validation.ValidateStruct(*reqBody)
-// 	if errors != nil {
-// 		return req.Status(400).JSON(errors)
-// 	}
-// 	productsContent := models.Products{
-// 		UserID:           uint(validation.DecodedToken["id"].(float64)),
-// 		ProductName:      reqBody.ProductName,
-// 		Categoryid:       reqBody.Categoryid,
-// 		ProductBrand:     reqBody.ProductBrand,
-// 		ProductCondition: reqBody.ProductCondition,
-// 		ShoeSize:         reqBody.ShoeSize,
-// 		ClothSize:        reqBody.ClothSize,
-// 		Color:            reqBody.Color,
-// 		Price:            reqBody.Price,
-// 	}
-// 	updateItem := DB.Save()
-// }
+func GetAllProducts(req *fiber.Ctx) error {
+	var products []models.Products
+	getProducts := DB.Find(&products)
+	if getProducts.Error != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "no user has listed an item",
+		})
+	}
+	return req.Status(201).JSON(products)
+}

@@ -58,8 +58,8 @@ type Products struct {
 	ClothSize        string          `json:"cloth_size,omitempty" gorm:"varchar(50); column:cloth_size"`
 	Color            string          `json:"color,omitempty" gorm:"varchar(100); column:color"`
 	Price            float32         `json:"price" gorm:"not null; column:price"`
-	CreatedAt        time.Time       `gorm:"timestamp;not null"`
-	UpdatedAt        time.Time       `gorm:"timestamp;not null"`
+	CreatedAt        time.Time       `json:"-" gorm:"timestamp;not null"`
+	UpdatedAt        time.Time       `json:"-" gorm:"timestamp;not null"`
 }
 
 type Cart struct {
