@@ -62,3 +62,7 @@ type CartResponse struct {
 	TotalPrice float32
 	Items      []Cart
 }
+
+type PaymentMethodResponse struct {
+	CreditCards []CreditCard `json:"credit_cards"`
+}

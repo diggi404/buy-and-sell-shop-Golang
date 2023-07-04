@@ -3,14 +3,18 @@ package models
 import "time"
 
 type User struct {
-	ID        uint      `json:"-" gorm:"primaryKey;autoIncrement"`
-	Name      string    `gorm:"type:varchar(100);not null"`
-	Email     string    `gorm:"type:varchar(255);not null;unique"`
-	Password  string    `json:"-" gorm:"type:varchar(255);not null"`
-	CartId    uint      `gorm:"column:cart_id"`
-	Closed    bool      `gorm:"not null;default:false"`
-	CreatedAt time.Time `gorm:"timestamp;not null"`
-	UpdatedAt time.Time `gorm:"timestamp;not null"`
+	ID          uint          `json:"-" gorm:"primaryKey;autoIncrement"`
+	Name        string        `gorm:"type:varchar(100);not null"`
+	Email       string        `gorm:"type:varchar(255);not null;unique"`
+	Password    string        `json:"-" gorm:"type:varchar(255);not null"`
+	CartId      uint          `gorm:"column:cart_id;unique"`
+	Closed      bool          `gorm:"not null;default:false"`
+	CreatedAt   time.Time     `gorm:"timestamp;not null"`
+	UpdatedAt   time.Time     `gorm:"timestamp;not null"`
+	CreditCards []CreditCard  `json:"credit_cards"`
+	Momo        []MobileMoney `json:"momo"`
+	Addresses   []AddressBook `json:"shipping_address"`
+	Products    []Products    `json:"products"`
 }
 
 type AddressBook struct {
@@ -63,7 +67,7 @@ type Products struct {
 }
 
 type Cart struct {
-	CartItemId       uint      `json:"-" gorm:"primaryKey;autoIncrement;column:cart_id"`
+	CartItemId       uint      `json:"-" gorm:"primaryKey;autoIncrement;column:cart_item_id"`
 	Userid           uint      `json:"-" gorm:"column:user_id"`
 	User             User      `json:"-" gorm:"foreignKey:Userid"`
 	ProductId        uint      `json:"product_id" gorm:"column:product_id"`
@@ -79,19 +83,48 @@ type Cart struct {
 	UpdatedAt        time.Time `json:"-" gorm:"timestamp;not null"`
 }
 
+type TotalCart struct {
+	CartID     uint      `json:"cart_id" gorm:"primaryKey;column:cart_id"`
+	User       User      `json:"-" gorm:"foreignKey:CartID;references:CartId"`
+	User_Id    uint      `json:"user_id" gorm:"column:user_id;not null;unique"`
+	NewUser    User      `json:"-" gorm:"foreignKey:User_Id"`
+	TotalPrice float32   `json:"total_price" gorm:"column:total_price"`
+	CreatedAt  time.Time `gorm:"timestamp;not null"`
+	UpdatedAt  time.Time `gorm:"timestamp;not null"`
+}
+
 type MobileMoney struct {
-	NumberId uint   `json:"number_id" gorm:"primaryKey;autoIncrement;column:number_id"`
-	User_ID  uint   `json:"-" gorm:"column:user_id"`
-	User     User   `json:"-" gorm:"foreignKey:User_ID"`
-	Number   uint   `json:"number" gorm:"column:number" validate:"required,min=10,max=10"`
-	Network  string `json:"network" gorm:"column:network" validate:"required"`
+	NumberId  uint      `json:"number_id" gorm:"primaryKey;autoIncrement;column:number_id"`
+	User_ID   uint      `json:"-" gorm:"column:user_id"`
+	User      User      `json:"-" gorm:"foreignKey:User_ID"`
+	Number    uint      `json:"number" gorm:"column:number" validate:"required,min=10,max=10"`
+	Network   string    `json:"network" gorm:"column:network" validate:"required"`
+	CreatedAt time.Time `gorm:"timestamp;not null"`
+	UpdatedAt time.Time `gorm:"timestamp;not null"`
 }
 
 type CreditCard struct {
-	CardId     uint `json:"card_id" gorm:"primaryKey;autoIncrement;column:card_id"`
-	User_id    uint `json:"-" gorm:"column:user_id"`
-	User       User `json:"-" gorm:"foreignKey:User_id"`
-	CardNumber uint `json:"card_number" gorm:"column:card_number" validate:"required,credit_card"`
-	CardMonth  uint `json:"card_month" gorm:"column:card_month" validate:"required,min=2,max=2"`
-	CardYear   uint `json:"card_year" gorm:"column:card_year" validate:"required,min=4,max=4"`
+	CardId         uint      `json:"card_id" gorm:"primaryKey;autoIncrement;column:card_id"`
+	User_ID        uint      `json:"-" gorm:"column:user_id"`
+	User           User      `json:"-" gorm:"foreignKey:User_ID"`
+	CardNumber     uint      `json:"card_number" gorm:"column:card_number" validate:"required"`
+	CardMonth      uint      `json:"card_month" gorm:"column:card_month" validate:"required,number,min=1,max=12"`
+	CardYear       uint      `json:"card_year" gorm:"column:card_year" validate:"required,number,min=23,max=30"`
+	CreatedAt      time.Time `gorm:"timestamp;not null"`
+	UpdatedAt      time.Time `gorm:"timestamp;not null"`
+	BillingAddress []BillingAddress
+}
+
+type BillingAddress struct {
+	AddressId  uint       `json:"address_id" gorm:"primaryKey;autoIncrement;column:address_id"`
+	CardID     uint       `json:"card_id" gorm:"column:card_id"`
+	CreditCard CreditCard `json:"credit_card" gorm:"foreignKey:CardID"`
+	FirstName  string     `gorm:"varchar(100);not null; column:fname"`
+	LastName   string     `gorm:"varchar(100);not null; column:lname"`
+	Address1   string     `gorm:"varchar(255);not null"`
+	City       string     `gorm:"varchar(100);not null"`
+	State      string     `gorm:"varchar(100);notn null"`
+	ZipCode    string     `gorm:"varchar(50);not null"`
+	CreatedAt  time.Time  `gorm:"timestamp;not null"`
+	UpdatedAt  time.Time  `gorm:"timestamp;not null"`
 }
