@@ -30,10 +30,6 @@ type UpdateAddressBook struct {
 	ZipCode   string `json:"zip_code" validate:"min=5,max=5"`
 }
 
-// type AddProductCategory struct {
-// 	Name string `json:"name"`
-// }
-
 type AddProductCategory struct {
 	Categories []ProductCategory `json:"categories"`
 }
@@ -63,6 +59,19 @@ type CartResponse struct {
 	Items      []Cart
 }
 
-type PaymentMethodResponse struct {
-	CreditCards []CreditCard `json:"credit_cards"`
+type AddCreditCard struct {
+	CardNumber uint           `json:"card_number" validate:"required"`
+	CardMonth  uint           `json:"card_month" validate:"required,number,min=1,max=12"`
+	CardYear   uint           `json:"card_year" validate:"required,number,min=23,max=30"`
+	AddressID  string         `json:"address_id"`
+	Address    BillingAddress `json:"billing_address"`
+}
+
+type BillingAddress struct {
+	FirstName string `json:"fname"`
+	LastName  string `json:"lname"`
+	Address1  string `json:"address1"`
+	City      string `json:"city"`
+	State     string `json:"state"`
+	ZipCode   string `json:"zip_code"`
 }

@@ -128,8 +128,7 @@ func GetCart(req *fiber.Ctx) error {
 	userId := uint(validation.DecodedToken["id"].(float64))
 	var cart []models.Cart
 	var user models.User
-	getCart := DB.Preload("Products").Where(&models.Cart{Userid: userId}).
-		Find(&cart)
+	getCart := DB.Where(&models.Cart{Userid: userId}).Find(&cart)
 	if getCart.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "an error occurred!",

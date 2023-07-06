@@ -32,7 +32,7 @@ func AddProductCategory(req *fiber.Ctx) error {
 
 func GetCategories(req *fiber.Ctx) error {
 	var categories []models.ProductCategory
-	queryCategories := handlers.DB.Find(&categories)
+	queryCategories := handlers.DB.Preload("Products").Find(&categories)
 	if queryCategories.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "no records found!",

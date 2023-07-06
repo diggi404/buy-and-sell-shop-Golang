@@ -30,8 +30,8 @@ func main() {
 	// db.Debug().AutoMigrate(&models.Products{}, &models.Cart{})
 	// db.Debug().AutoMigrate(&models.User{}, &models.Cart{})
 	// db.Debug().AutoMigrate(&models.CreditCard{}, &models.MobileMoney{}, &models.BillingAddress{}, &models.TotalCart{})
-	// db.Debug().AutoMigrate(&models.TotalCart{}, &models.Cart{})
-	// db.Debug().AutoMigrate(&models.User{})
+	// db.Debug().AutoMigrate(&models.Products{}, &models.ProductCategory{}, &models.CategoryOptions{}, &models.Cart{})
+	// db.Debug().AutoMigrate(&models.User{}, &models.AddressBook{}, &models.CreditCard{})
 	handlers.DB = db
 	app.Post("/auth/login", handlers.Login)
 	app.Post("/signup", handlers.Signup)
