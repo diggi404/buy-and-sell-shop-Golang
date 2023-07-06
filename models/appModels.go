@@ -62,7 +62,7 @@ type CartResponse struct {
 type AddCreditCard struct {
 	CardNumber uint           `json:"card_number" validate:"required"`
 	CardMonth  uint           `json:"card_month" validate:"required,number,min=1,max=12"`
-	CardYear   uint           `json:"card_year" validate:"required,number,min=23,max=30"`
+	CardYear   uint           `json:"card_year" validate:"required,number,min=2023,max=2030"`
 	AddressID  string         `json:"address_id"`
 	Address    BillingAddress `json:"billing_address"`
 }

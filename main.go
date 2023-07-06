@@ -32,6 +32,7 @@ func main() {
 	// db.Debug().AutoMigrate(&models.CreditCard{}, &models.MobileMoney{}, &models.BillingAddress{}, &models.TotalCart{})
 	// db.Debug().AutoMigrate(&models.Products{}, &models.ProductCategory{}, &models.CategoryOptions{}, &models.Cart{})
 	// db.Debug().AutoMigrate(&models.User{}, &models.AddressBook{}, &models.CreditCard{})
+	// db.Debug().AutoMigrate(&models.CreditCard{})
 	handlers.DB = db
 	app.Post("/auth/login", handlers.Login)
 	app.Post("/signup", handlers.Signup)
@@ -51,7 +52,7 @@ func main() {
 	app.Get("/user/cart", validation.Authenticator, handlers.GetCart)
 	app.Delete("/user/cart/:product_id", validation.Authenticator, handlers.DeleteCartItem)
 	app.Post("/user/create/credit_card", validation.Authenticator, handlers.AddCreditCard)
-	app.Get("/user/credit_cards", validation.Authenticator, handlers.GetCreditCards)
+	// app.Get("/user/credit_cards", validation.Authenticator, handlers.GetCreditCards)
 	app.Delete("/user/payments/:card_id", validation.Authenticator, handlers.DeleteCrediCard)
 	app.Get("/user/payments_methods", validation.Authenticator, handlers.PaymentMethods)
 

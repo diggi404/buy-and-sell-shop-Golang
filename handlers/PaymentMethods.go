@@ -3,7 +3,6 @@ package handlers
 import (
 	"Users/diggi/Documents/Go_tutorials/models"
 	"Users/diggi/Documents/Go_tutorials/validation"
-	"fmt"
 	"strconv"
 
 	creditcard "github.com/durango/go-credit-card"
@@ -25,22 +24,36 @@ func AddCreditCard(req *fiber.Ctx) error {
 		return req.Status(400).JSON(errors)
 	}
 
+	ccNum := strconv.FormatUint(uint64(reqBody.CardNumber), 10)
+	ccMon := strconv.FormatUint(uint64(reqBody.CardMonth), 10)
+	ccYear := strconv.FormatUint(uint64(reqBody.CardYear), 10)
+
 	// execute when the user doesn't select an address from the addressbook
 	if len(reqBody.AddressID) == 0 {
-		newReqBody := new(models.CreateAddressBook)
-		errors := validation.ValidateStruct(*newReqBody)
+		addressReqBody := new(models.CreateAddressBook)
+		errors := validation.ValidateStruct(*addressReqBody)
 		if errors != nil {
 			return req.Status(400).JSON(errors)
 		}
-		ccNum := strconv.FormatUint(uint64(reqBody.CardNumber), 10)
 		card := creditcard.Card{
 			Number: ccNum,
+			Month:  ccMon,
+			Year:   ccYear,
 		}
 		if err := card.ValidateNumber(); !err {
 			return req.Status(400).JSON(fiber.Map{
 				"msg": "your credit card number is invalid!",
 			})
 		}
+		err := card.Method()
+		if err != nil {
+			return req.Status(400).JSON(fiber.Map{
+				"msg": "your credit card is invalid!",
+			})
+		}
+		rawLastFour, _ := card.LastFour()
+		cardType := card.Company.Short
+		lastFour, _ := strconv.ParseUint(rawLastFour, 10, 32)
 		checkCard := DB.Where(&models.CreditCard{User_ID: userId, CardNumber: reqBody.CardNumber}).
 			Find(&models.CreditCard{})
 		if checkCard.Error != nil {
@@ -67,7 +80,6 @@ func AddCreditCard(req *fiber.Ctx) error {
 				"msg": "an error occurred!",
 			})
 		}
-		fmt.Println(addresses)
 		addressId := addresses.AddressId
 		creditCard = models.CreditCard{
 			User_ID:    userId,
@@ -75,6 +87,8 @@ func AddCreditCard(req *fiber.Ctx) error {
 			CardNumber: reqBody.CardNumber,
 			CardMonth:  reqBody.CardMonth,
 			CardYear:   reqBody.CardYear,
+			CardType:   cardType,
+			LastFour:   uint(lastFour),
 		}
 		addCard := DB.Create(&creditCard)
 		if addCard.Error != nil {
@@ -92,6 +106,25 @@ func AddCreditCard(req *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	card := creditcard.Card{
+		Number: ccNum,
+		Month:  ccMon,
+		Year:   ccYear,
+	}
+	if err := card.ValidateNumber(); !err {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "your credit card number is invalid!",
+		})
+	}
+	cardError := card.Method()
+	if cardError != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "your credit card is invalid!",
+		})
+	}
+	rawLastFour, _ := card.LastFour()
+	cardType := card.Company.Short
+	lastFour, _ := strconv.ParseUint(rawLastFour, 10, 32)
 	checkCard := DB.Where(&models.CreditCard{User_ID: userId, CardNumber: reqBody.CardNumber}).
 		Find(&models.CreditCard{})
 	if checkCard.Error != nil {
@@ -110,6 +143,8 @@ func AddCreditCard(req *fiber.Ctx) error {
 		CardNumber: reqBody.CardNumber,
 		CardMonth:  reqBody.CardMonth,
 		CardYear:   reqBody.CardYear,
+		LastFour:   uint(lastFour),
+		CardType:   cardType,
 	}
 	addCard := DB.Create(&creditCard)
 	if addCard.Error != nil {
@@ -122,23 +157,23 @@ func AddCreditCard(req *fiber.Ctx) error {
 	})
 }
 
-func GetCreditCards(req *fiber.Ctx) error {
-	userId := uint(validation.DecodedToken["id"].(float64))
-	var creditcards []models.CreditCard
-	getCards := DB.Where(&models.CreditCard{User_ID: userId}).Find(&creditcards)
-	if getCards.Error != nil {
-		return req.Status(400).JSON(fiber.Map{
-			"msg": "an error occurred!",
-		})
-	}
-	if getCards.RowsAffected == 0 {
-		return req.Status(400).JSON(fiber.Map{
-			"msg": "no saved credit cards found!",
-		})
-	}
+// func GetCreditCards(req *fiber.Ctx) error {
+// 	userId := uint(validation.DecodedToken["id"].(float64))
+// 	var creditcards []models.CreditCard
+// 	getCards := DB.Where(&models.CreditCard{User_ID: userId}).Find(&creditcards)
+// 	if getCards.Error != nil {
+// 		return req.Status(400).JSON(fiber.Map{
+// 			"msg": "an error occurred!",
+// 		})
+// 	}
+// 	if getCards.RowsAffected == 0 {
+// 		return req.Status(400).JSON(fiber.Map{
+// 			"msg": "no saved credit cards found!",
+// 		})
+// 	}
 
-	return req.Status(201).JSON(creditcards)
-}
+// 	return req.Status(201).JSON(creditcards)
+// }
 
 func DeleteCrediCard(req *fiber.Ctx) error {
 	if len(req.Params("card_id")) == 0 {
