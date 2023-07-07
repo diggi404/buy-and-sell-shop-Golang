@@ -8,6 +8,7 @@ require (
 	github.com/durango/go-credit-card v0.0.0-20220404131259-a9e175ba4082 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/ggwhite/go-masker v1.0.9 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.1 // indirect

@@ -52,7 +52,6 @@ func main() {
 	app.Get("/user/cart", validation.Authenticator, handlers.GetCart)
 	app.Delete("/user/cart/:product_id", validation.Authenticator, handlers.DeleteCartItem)
 	app.Post("/user/create/credit_card", validation.Authenticator, handlers.AddCreditCard)
-	// app.Get("/user/credit_cards", validation.Authenticator, handlers.GetCreditCards)
 	app.Delete("/user/payments/:card_id", validation.Authenticator, handlers.DeleteCrediCard)
 	app.Get("/user/payments_methods", validation.Authenticator, handlers.PaymentMethods)
 

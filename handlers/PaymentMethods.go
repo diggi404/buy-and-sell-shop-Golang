@@ -5,6 +5,8 @@ import (
 	"Users/diggi/Documents/Go_tutorials/validation"
 	"strconv"
 
+	"github.com/ggwhite/go-masker"
+
 	creditcard "github.com/durango/go-credit-card"
 	"github.com/gofiber/fiber/v2"
 )
@@ -54,6 +56,7 @@ func AddCreditCard(req *fiber.Ctx) error {
 		rawLastFour, _ := card.LastFour()
 		cardType := card.Company.Short
 		lastFour, _ := strconv.ParseUint(rawLastFour, 10, 32)
+		maskedCC := masker.CreditCard(ccNum)
 		checkCard := DB.Where(&models.CreditCard{User_ID: userId, CardNumber: reqBody.CardNumber}).
 			Find(&models.CreditCard{})
 		if checkCard.Error != nil {
@@ -82,13 +85,14 @@ func AddCreditCard(req *fiber.Ctx) error {
 		}
 		addressId := addresses.AddressId
 		creditCard = models.CreditCard{
-			User_ID:    userId,
-			AddressID:  addressId,
-			CardNumber: reqBody.CardNumber,
-			CardMonth:  reqBody.CardMonth,
-			CardYear:   reqBody.CardYear,
-			CardType:   cardType,
-			LastFour:   uint(lastFour),
+			User_ID:      userId,
+			AddressID:    addressId,
+			CardNumber:   reqBody.CardNumber,
+			CardMonth:    reqBody.CardMonth,
+			CardYear:     reqBody.CardYear,
+			CardType:     cardType,
+			LastFour:     uint(lastFour),
+			MaskedNumber: maskedCC,
 		}
 		addCard := DB.Create(&creditCard)
 		if addCard.Error != nil {
@@ -125,6 +129,7 @@ func AddCreditCard(req *fiber.Ctx) error {
 	rawLastFour, _ := card.LastFour()
 	cardType := card.Company.Short
 	lastFour, _ := strconv.ParseUint(rawLastFour, 10, 32)
+	maskedCC := masker.CreditCard(ccNum)
 	checkCard := DB.Where(&models.CreditCard{User_ID: userId, CardNumber: reqBody.CardNumber}).
 		Find(&models.CreditCard{})
 	if checkCard.Error != nil {
@@ -138,13 +143,14 @@ func AddCreditCard(req *fiber.Ctx) error {
 		})
 	}
 	creditCard = models.CreditCard{
-		User_ID:    userId,
-		AddressID:  uint(addressId),
-		CardNumber: reqBody.CardNumber,
-		CardMonth:  reqBody.CardMonth,
-		CardYear:   reqBody.CardYear,
-		LastFour:   uint(lastFour),
-		CardType:   cardType,
+		User_ID:      userId,
+		AddressID:    uint(addressId),
+		CardNumber:   reqBody.CardNumber,
+		CardMonth:    reqBody.CardMonth,
+		CardYear:     reqBody.CardYear,
+		LastFour:     uint(lastFour),
+		CardType:     cardType,
+		MaskedNumber: maskedCC,
 	}
 	addCard := DB.Create(&creditCard)
 	if addCard.Error != nil {
@@ -156,24 +162,6 @@ func AddCreditCard(req *fiber.Ctx) error {
 		"msg": "credit card has been saved!",
 	})
 }
-
-// func GetCreditCards(req *fiber.Ctx) error {
-// 	userId := uint(validation.DecodedToken["id"].(float64))
-// 	var creditcards []models.CreditCard
-// 	getCards := DB.Where(&models.CreditCard{User_ID: userId}).Find(&creditcards)
-// 	if getCards.Error != nil {
-// 		return req.Status(400).JSON(fiber.Map{
-// 			"msg": "an error occurred!",
-// 		})
-// 	}
-// 	if getCards.RowsAffected == 0 {
-// 		return req.Status(400).JSON(fiber.Map{
-// 			"msg": "no saved credit cards found!",
-// 		})
-// 	}
-
-// 	return req.Status(201).JSON(creditcards)
-// }
 
 func DeleteCrediCard(req *fiber.Ctx) error {
 	if len(req.Params("card_id")) == 0 {
@@ -200,7 +188,9 @@ func DeleteCrediCard(req *fiber.Ctx) error {
 func PaymentMethods(req *fiber.Ctx) error {
 	userId := uint(validation.DecodedToken["id"].(float64))
 	var users []models.User
-	getPaymentMethods := DB.Preload("CreditCards").Preload("CreditCards.Address").Preload("Momo").First(&users, userId)
+	getPaymentMethods := DB.Preload("CreditCards").
+		Preload("CreditCards.Address").
+		Preload("Momo").First(&users, userId)
 	if getPaymentMethods.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "an error occurred!",
