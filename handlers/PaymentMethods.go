@@ -32,7 +32,10 @@ func AddCreditCard(req *fiber.Ctx) error {
 
 	// execute when the user doesn't select an address from the addressbook
 	if len(reqBody.AddressID) == 0 {
-		addressReqBody := new(models.CreateAddressBook)
+		addressReqBody := new(models.CreditCardManual)
+		if err := req.BodyParser(addressReqBody); err != nil {
+			return err
+		}
 		errors := validation.ValidateStruct(*addressReqBody)
 		if errors != nil {
 			return req.Status(400).JSON(errors)
@@ -185,7 +188,7 @@ func DeleteCrediCard(req *fiber.Ctx) error {
 	})
 }
 
-func PaymentMethods(req *fiber.Ctx) error {
+func GetPaymentMethods(req *fiber.Ctx) error {
 	userId := uint(validation.DecodedToken["id"].(float64))
 	var users []models.User
 	getPaymentMethods := DB.Preload("CreditCards").
@@ -202,4 +205,65 @@ func PaymentMethods(req *fiber.Ctx) error {
 		})
 	}
 	return req.Status(201).JSON(users)
+}
+
+func MakeCardDefault(req *fiber.Ctx) error {
+	userId := uint(validation.DecodedToken["id"].(float64))
+	if len(req.Params("card_id")) == 0 {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "required parameter is missing!",
+		})
+	}
+	card_id, err := strconv.ParseUint(req.Params("card_id"), 10, 32)
+	if err != nil {
+		return err
+	}
+
+	checkCard := DB.Where(&models.CreditCard{
+		User_ID: userId,
+		CardId:  uint(card_id),
+	}).
+		First(&models.CreditCard{})
+	if checkCard.Error != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "no such card found!",
+		})
+	}
+	makeDefault := DB.Model(&models.User{}).
+		Where(&models.User{ID: uint(userId)}).
+		Update("default_payment_method", card_id)
+	if makeDefault.Error != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "error making card default!",
+		})
+	}
+	if makeDefault.RowsAffected == 0 {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "no such card found!",
+		})
+	}
+	cleanUpDefault := DB.Model(&models.CreditCard{}).
+		Where(&models.CreditCard{IsDefault: true}).
+		Update("is_default", false)
+	if cleanUpDefault.Error != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "error making default!",
+		})
+	}
+	setDefault := DB.Model(&models.CreditCard{}).
+		Where(&models.CreditCard{CardId: uint(card_id)}).
+		Update("is_default", true)
+	if setDefault.Error != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "error making card default!",
+		})
+	}
+	if setDefault.RowsAffected == 0 {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "no such card found!aaa",
+		})
+	}
+	return req.Status(201).JSON(fiber.Map{
+		"msg": "default payment registered!",
+	})
 }

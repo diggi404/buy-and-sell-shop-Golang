@@ -26,13 +26,7 @@ func main() {
 		fmt.Println(err.Error())
 		panic("failed to connect database!")
 	}
-	// db.Debug().AutoMigrate(&models.User{}, &models.AddressBook{}, &models.CategoryOptions{}, &models.Products{}, &models.ProductCategory{}, &models.Cart{})
-	// db.Debug().AutoMigrate(&models.Products{}, &models.Cart{})
-	// db.Debug().AutoMigrate(&models.User{}, &models.Cart{})
-	// db.Debug().AutoMigrate(&models.CreditCard{}, &models.MobileMoney{}, &models.BillingAddress{}, &models.TotalCart{})
-	// db.Debug().AutoMigrate(&models.Products{}, &models.ProductCategory{}, &models.CategoryOptions{}, &models.Cart{})
-	// db.Debug().AutoMigrate(&models.User{}, &models.AddressBook{}, &models.CreditCard{})
-	// db.Debug().AutoMigrate(&models.CreditCard{})
+	// db.Debug().AutoMigrate(&models.Orders{}, &models.PurchasedItems{})
 	handlers.DB = db
 	app.Post("/auth/login", handlers.Login)
 	app.Post("/signup", handlers.Signup)
@@ -53,7 +47,10 @@ func main() {
 	app.Delete("/user/cart/:product_id", validation.Authenticator, handlers.DeleteCartItem)
 	app.Post("/user/create/credit_card", validation.Authenticator, handlers.AddCreditCard)
 	app.Delete("/user/payments/:card_id", validation.Authenticator, handlers.DeleteCrediCard)
-	app.Get("/user/payments_methods", validation.Authenticator, handlers.PaymentMethods)
+	app.Get("/user/payments_methods", validation.Authenticator, handlers.GetPaymentMethods)
+	app.Put("/user/payments_methods/:card_id", validation.Authenticator, handlers.MakeCardDefault)
+	app.Post("/user/checkout", validation.Authenticator, handlers.Checkout)
+	app.Get("/user/orders", validation.Authenticator, handlers.GetUserOrders)
 
 	app.Listen(":3000")
 }

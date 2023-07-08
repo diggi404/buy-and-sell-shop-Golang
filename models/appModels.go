@@ -75,3 +75,18 @@ type BillingAddress struct {
 	State     string `json:"state"`
 	ZipCode   string `json:"zip_code"`
 }
+
+type CreditCardManual struct {
+	CardNumber uint              `json:"card_number" validate:"required"`
+	CardMonth  uint              `json:"card_month" validate:"required,number,min=1,max=12"`
+	CardYear   uint              `json:"card_year" validate:"required,number,min=2023,max=2030"`
+	AddressID  string            `json:"address_id"`
+	Address    CreateAddressBook `json:"billing_address"`
+}
+
+type CreditCardCheckout struct {
+	CartId     uint    `json:"cart_id" validate:"required"`
+	AddressId  uint    `json:"address_id" validate:"required"`
+	TotalPrice float32 `json:"total_price" validate:"required"`
+	CardId     uint    `json:"card_id" validate:"required"`
+}

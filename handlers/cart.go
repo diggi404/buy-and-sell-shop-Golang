@@ -149,7 +149,6 @@ func GetCart(req *fiber.Ctx) error {
 	for _, value := range cart {
 		totalPrice = totalPrice + value.Price
 	}
-
 	response := models.CartResponse{
 		CartId:     cartId,
 		TotalPrice: totalPrice,

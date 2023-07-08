@@ -5,16 +5,17 @@ import (
 )
 
 type User struct {
-	ID          uint          `json:"-" gorm:"primaryKey;autoIncrement"`
-	Name        string        `gorm:"type:varchar(100);not null"`
-	Email       string        `gorm:"type:varchar(255);not null;unique"`
-	Password    string        `json:"-" gorm:"type:varchar(255);not null"`
-	CartId      uint          `gorm:"column:cart_id;unique"`
-	Closed      bool          `gorm:"not null;default:false"`
-	CreatedAt   time.Time     `json:"-" gorm:"timestamp;not null"`
-	UpdatedAt   time.Time     `json:"-" gorm:"timestamp;not null"`
-	CreditCards []CreditCard  `json:"credit_cards"`
-	Momo        []MobileMoney `json:"momo"`
+	ID                   uint          `json:"-" gorm:"primaryKey;autoIncrement"`
+	Name                 string        `gorm:"type:varchar(100);not null"`
+	Email                string        `gorm:"type:varchar(255);not null;unique"`
+	Password             string        `json:"-" gorm:"type:varchar(255);not null"`
+	CartId               uint          `gorm:"column:cart_id;unique"`
+	Closed               bool          `gorm:"not null;default:false"`
+	DefaultPaymentMethod uint          `json:"default_payment_method" gorm:"column:default_payment_method;unique"`
+	CreatedAt            time.Time     `json:"-" gorm:"timestamp;not null"`
+	UpdatedAt            time.Time     `json:"-" gorm:"timestamp;not null"`
+	CreditCards          []CreditCard  `json:"credit_cards"`
+	Momo                 []MobileMoney `json:"momo"`
 }
 
 type AddressBook struct {
@@ -72,7 +73,7 @@ type Cart struct {
 	Userid           uint      `json:"-" gorm:"column:user_id"`
 	User             User      `json:"-" gorm:"foreignKey:Userid"`
 	ProductId        uint      `json:"product_id" gorm:"column:product_id"`
-	Products         Products  `json:"-" gorm:"foreignKey:ProductId"`
+	Products         Products  `json:"-" gorm:"foreignKey:ProductId;constraint:OnDelete:CASCADE"`
 	ProductName      string    `json:"product_name" gorm:"varchar(255);not null"`
 	ProductBrand     string    `json:"product_brand" gorm:"varchar(255);not null; column:product_brand"`
 	ProductCondition string    `json:"product_condition" gorm:"varchar(255);not null; conlumn:product_condition"`
@@ -119,4 +120,37 @@ type CreditCard struct {
 	IsDefault    bool        `json:"is_default" gorm:"column:is_default;default:false"`
 	CreatedAt    time.Time   `json:"-" gorm:"timestamp;not null"`
 	UpdatedAt    time.Time   `json:"-" gorm:"timestamp;not null"`
+}
+
+type PurchasedItems struct {
+	ItemID           uint      `json:"-" gorm:"primaryKey;autoIncrement;column:item_id"`
+	OrderID          uint      `json:"order_id" gorm:"column:order_id"`
+	Orders           Orders    `json:"-" gorm:"foreignKey:OrderID"`
+	ProductName      string    `json:"product_name" gorm:"not null"`
+	ProductBrand     string    `json:"product_brand" gorm:"not null; column:product_brand"`
+	ProductCondition string    `json:"product_condition" gorm:"not null; conlumn:product_condition"`
+	ShoeSize         float32   `json:"shoe_size,omitempty" gorm:"column:shoe_size"`
+	ClothSize        string    `json:"cloth_size,omitempty" gorm:"column:cloth_size"`
+	Color            string    `json:"color,omitempty" gorm:"column:color"`
+	Price            float32   `json:"price" gorm:"not null; column:price"`
+	CreatedAt        time.Time `json:"-" gorm:"timestamp;not null"`
+	UpdatedAt        time.Time `json:"-" gorm:"timestamp;not null"`
+}
+
+type Orders struct {
+	OrderId        uint             `json:"order_id" gorm:"primaryKey;autoIncrement;column:order_id"`
+	UserId         uint             `json:"-" gorm:"column:user_id"`
+	User           User             `json:"-" gorm:"foreignKey:UserId"`
+	PaymentId      uint             `json:"payment_id" gorm:"column:payment_id"`
+	PaymentMethod  string           `json:"payment_method"`
+	TrackingNumber string           `json:"tracking_number" gorm:"column:tracking_number"`
+	Carrier        string           `json:"carrier" gorm:"column:carrier"`
+	PaidTotal      float32          `json:"paid_total" gorm:"column:paid_total;not null"`
+	Status         string           `json:"order_status" gorm:"column:order_status;not null"`
+	CanCancel      bool             `json:"can_cancel" gorm:"column:can_cancel"`
+	PurchasedItems []PurchasedItems `json:"items" gorm:"foreignKey:OrderID"`
+	AddressId      uint             `json:"-" gorm:"column:address_id"`
+	AddressBook    AddressBook      `json:"shipping_address" gorm:"foreignKey:AddressId"`
+	CreatedAt      time.Time        `json:"-" gorm:"timestamp;not null"`
+	UpdatedAt      time.Time        `json:"-" gorm:"timestamp;not null"`
 }
