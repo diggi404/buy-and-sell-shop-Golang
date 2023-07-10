@@ -9,6 +9,7 @@ import (
 )
 
 func PostItem(req *fiber.Ctx) error {
+	userId := validation.DecodedToken["id"].(float64)
 	reqBody := new(models.AddProduct)
 	if err := req.BodyParser(reqBody); err != nil {
 		return err
@@ -18,7 +19,7 @@ func PostItem(req *fiber.Ctx) error {
 		return req.Status(400).JSON(errors)
 	}
 	productsContent := models.Products{
-		UserID:           uint(validation.DecodedToken["id"].(float64)),
+		UserID:           uint(userId),
 		ProductName:      reqBody.ProductName,
 		Categoryid:       reqBody.Categoryid,
 		ProductBrand:     reqBody.ProductBrand,
@@ -34,6 +35,23 @@ func PostItem(req *fiber.Ctx) error {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "cannot add product details!",
 		})
+	}
+	var seller models.Sellers
+	var sellerInfo models.User
+	checkSeller := DB.Where(&models.Sellers{UserID: uint(userId)}).First(&seller)
+	if checkSeller.Error != nil {
+		DB.Where(&models.User{ID: uint(userId)}).First(&sellerInfo)
+		newSeller := models.Sellers{
+			UserID: uint(userId),
+			Name:   sellerInfo.Name,
+			Email:  sellerInfo.Email,
+		}
+		saveSellerInfo := DB.Create(&newSeller)
+		if saveSellerInfo.Error == nil {
+			return req.Status(201).JSON(fiber.Map{
+				"msg": "Item has been successfully posted!",
+			})
+		}
 	}
 	return req.Status(201).JSON(fiber.Map{
 		"msg": "Item has been successfully posted!",

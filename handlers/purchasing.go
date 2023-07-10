@@ -67,8 +67,6 @@ func Checkout(req *fiber.Ctx) error {
 		AddressId:     address.AddressId,
 		PaymentMethod: paymentInfo,
 		PaidTotal:     totalCart.TotalPrice,
-		Status:        "processing",
-		CanCancel:     true,
 	}
 	keepOrder := DB.Create(&order)
 	if keepOrder.Error != nil {
@@ -81,23 +79,29 @@ func Checkout(req *fiber.Ctx) error {
 			"msg": "an error occurred. Please try again!",
 		})
 	}
-
-	// marshal cart struct into json byte
+	var (
+		m       []map[string]interface{}
+		prods   []map[string]interface{}
+		prodIds []models.Products
+	)
 	cartByte, _ := json.Marshal(cart)
-
-	//unmarsh the byte into a map to easily add the order_id
-	var m []map[string]interface{}
 	json.Unmarshal(cartByte, &m)
 	for _, value := range m {
+		v := make(map[string]interface{})
 		value["order_id"] = order.OrderId
+		value["order_status"] = "processing"
+		value["can_cancel"] = true
+		v["product_id"] = value["product_id"]
+
+		prods = append(prods, v)
 	}
-	//then marsh the map into a new json byte
+	prodByte, _ := json.Marshal(prods)
+	json.Unmarshal(prodByte, &prodIds)
+
 	newCartByte, _ := json.Marshal(m)
 
-	// unmarshal the byte into the purchasedItem struct
 	var items []models.PurchasedItems
 	json.Unmarshal(newCartByte, &items)
-
 	keepPurchasedItems := DB.Create(&items)
 	if keepPurchasedItems.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
@@ -109,28 +113,27 @@ func Checkout(req *fiber.Ctx) error {
 			"msg": "an error occurred. Please try again!",
 		})
 	}
+	var tempShipmentMap []map[string]interface{}
+	var shipmentMap []map[string]interface{}
+	var shipment []models.Shipment
+	itemsByte, _ := json.Marshal(items)
+	json.Unmarshal(itemsByte, &tempShipmentMap)
+	for _, item := range tempShipmentMap {
+		temp := make(map[string]interface{})
+		temp["item_id"] = item["item_id"]
+		shipmentMap = append(shipmentMap, temp)
+	}
+	shipmentByte, _ := json.Marshal(shipmentMap)
+	json.Unmarshal(shipmentByte, &shipment)
+	DB.Create(&shipment)
+	deletSoldProduct := DB.Delete(&prodIds)
+	if deletSoldProduct.RowsAffected == 0 {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "an error occurred. Please try again!",
+		})
+	}
 	return req.Status(201).JSON(fiber.Map{
 		"msg": "order has been confirmed!",
 	})
 
-}
-
-func GetUserOrders(req *fiber.Ctx) error {
-	userId := uint(validation.DecodedToken["id"].(float64))
-	var orders []models.Orders
-	checkOrders := DB.Preload("PurchasedItems").
-		Preload("AddressBook").
-		Where(&models.Orders{UserId: userId}).
-		Find(&orders)
-	if checkOrders.Error != nil {
-		return req.Status(400).JSON(fiber.Map{
-			"msg": "an error occurred!",
-		})
-	}
-	if checkOrders.RowsAffected == 0 {
-		return req.Status(400).JSON(fiber.Map{
-			"msg": "your order history is empty. Kindly make a purchase!",
-		})
-	}
-	return req.Status(201).JSON(orders)
 }

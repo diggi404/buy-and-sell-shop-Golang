@@ -26,7 +26,7 @@ func main() {
 		fmt.Println(err.Error())
 		panic("failed to connect database!")
 	}
-	// db.Debug().AutoMigrate(&models.Orders{}, &models.PurchasedItems{})
+	// db.Debug().AutoMigrate(&models.Orders{}, &models.PurchasedItems{}, &models.Shipment{}, &models.Sellers{})
 	handlers.DB = db
 	app.Post("/auth/login", handlers.Login)
 	app.Post("/signup", handlers.Signup)

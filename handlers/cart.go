@@ -78,6 +78,7 @@ func AddToCart(req *fiber.Ctx) error {
 	addCart := models.Cart{
 		Userid:           userId,
 		ProductId:        products.ProductID,
+		SellerID:         products.UserID,
 		ProductName:      products.ProductName,
 		ProductBrand:     products.ProductBrand,
 		ProductCondition: products.ProductCondition,
@@ -144,6 +145,7 @@ func GetCart(req *fiber.Ctx) error {
 			"msg": "your cart is empty",
 		})
 	}
+
 	var totalPrice float32
 	cartId := user.CartId
 	for _, value := range cart {
