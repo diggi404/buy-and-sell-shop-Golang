@@ -27,6 +27,7 @@ func main() {
 		panic("failed to connect database!")
 	}
 	// db.Debug().AutoMigrate(&models.Orders{}, &models.PurchasedItems{}, &models.Shipment{}, &models.Sellers{})
+	// db.Debug().AutoMigrate(&models.Products{}, &models.Cart{})
 	handlers.DB = db
 	app.Post("/auth/login", handlers.Login)
 	app.Post("/signup", handlers.Signup)
@@ -51,6 +52,8 @@ func main() {
 	app.Put("/user/payments_methods/:card_id", validation.Authenticator, handlers.MakeCardDefault)
 	app.Post("/user/checkout", validation.Authenticator, handlers.Checkout)
 	app.Get("/user/orders", validation.Authenticator, handlers.GetUserOrders)
+	app.Get("/user/orders/in-progress", validation.Authenticator, handlers.GetInProgressItems)
+	app.Put("/user/orders/tracking/:item_id", validation.Authenticator, handlers.FixTrackingNumbers)
 
 	app.Listen(":3000")
 }

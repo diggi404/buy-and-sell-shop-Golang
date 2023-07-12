@@ -64,6 +64,7 @@ type Products struct {
 	ClothSize        string          `json:"cloth_size,omitempty" gorm:"varchar(50); column:cloth_size"`
 	Color            string          `json:"color,omitempty" gorm:"varchar(100); column:color"`
 	Price            float32         `json:"price" gorm:"not null; column:price"`
+	ItemLikes        int             `json:"likes" gorm:"column:likes;not null;default:0"`
 	CreatedAt        time.Time       `json:"-" gorm:"timestamp;not null"`
 	UpdatedAt        time.Time       `json:"-" gorm:"timestamp;not null"`
 }
@@ -75,7 +76,7 @@ type Cart struct {
 	ProductId        uint      `json:"product_id" gorm:"column:product_id"`
 	Products         Products  `json:"-" gorm:"foreignKey:ProductId;constraint:OnDelete:CASCADE"`
 	SellerID         uint      `json:"seller_id" gorm:"column:seller_id"`
-	Seller           User      `json:"seller_info" gorm:"foreignKey:SellerID"`
+	Seller           User      `json:"-" gorm:"foreignKey:SellerID"`
 	ProductName      string    `json:"product_name" gorm:"varchar(255);not null"`
 	ProductBrand     string    `json:"product_brand" gorm:"varchar(255);not null; column:product_brand"`
 	ProductCondition string    `json:"product_condition" gorm:"varchar(255);not null; conlumn:product_condition"`
@@ -84,6 +85,7 @@ type Cart struct {
 	Color            string    `json:"color,omitempty" gorm:"varchar(100); column:color"`
 	Price            float32   `json:"price" gorm:"not null; column:price"`
 	CreatedAt        time.Time `json:"-" gorm:"timestamp;not null"`
+	Likes            int       `json:"likes" gorm:"column:likes;not null;default:0"`
 	UpdatedAt        time.Time `json:"-" gorm:"timestamp;not null"`
 }
 
@@ -128,8 +130,8 @@ type Shipment struct {
 	TrackingId     uint           `json:"tracking_id" gorm:"primaryKey;autoIncrement;column:tracking_id"`
 	ItemId         uint           `json:"item_id" gorm:"column:item_id;unique"`
 	PurchasedItems PurchasedItems `json:"-" gorm:"foreignKey:ItemId"`
-	TrackingNumber string         `json:"tracking_number" gorm:"column:tracking_number"`
-	Carrier        string         `json:"carrier" gorm:"column:carrier"`
+	TrackingNumber string         `json:"tracking_number" gorm:"column:tracking_number" validate:"required"`
+	Carrier        string         `json:"carrier" gorm:"column:carrier" validate:"required"`
 }
 
 type PurchasedItems struct {
@@ -144,6 +146,8 @@ type PurchasedItems struct {
 	ClothSize        string     `json:"cloth_size,omitempty" gorm:"column:cloth_size"`
 	Color            string     `json:"color,omitempty" gorm:"column:color"`
 	Price            float32    `json:"price" gorm:"not null; column:price"`
+	OrderStatus      string     `json:"order_status" gorm:"column:order_status;default:processing"`
+	CanCancel        bool       `json:"can_cancel" gorm:"column:can_cancel;default:true"`
 	Seller           Sellers    `json:"seller_info" gorm:"foreignKey:SellerId"`
 	Shipment         []Shipment `json:"shipment" gorm:"foreignKey:ItemId"`
 	CreatedAt        time.Time  `json:"-" gorm:"timestamp;not null"`
@@ -158,8 +162,8 @@ type Orders struct {
 	PaymentMethod  string           `json:"payment_method" gorm:"column:payment_method"`
 	PaidTotal      float32          `json:"paid_total" gorm:"column:paid_total;not null"`
 	PurchasedItems []PurchasedItems `json:"items" gorm:"foreignKey:OrderID"`
-	AddressId      uint             `json:"-" gorm:"column:address_id"`
-	AddressBook    AddressBook      `json:"shipping_address" gorm:"foreignKey:AddressId"`
+	AddressID      uint             `json:"-" gorm:"column:address_id"`
+	AddressBook    AddressBook      `json:"shipping_address" gorm:"foreignKey:AddressID"`
 	CreatedAt      time.Time        `json:"-" gorm:"timestamp;not null"`
 	UpdatedAt      time.Time        `json:"-" gorm:"timestamp;not null"`
 }

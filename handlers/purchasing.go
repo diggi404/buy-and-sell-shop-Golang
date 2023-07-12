@@ -64,7 +64,7 @@ func Checkout(req *fiber.Ctx) error {
 	order := models.Orders{
 		UserId:        userId,
 		PaymentId:     creditcard.CardId,
-		AddressId:     address.AddressId,
+		AddressID:     reqBody.AddressId,
 		PaymentMethod: paymentInfo,
 		PaidTotal:     totalCart.TotalPrice,
 	}
@@ -89,8 +89,8 @@ func Checkout(req *fiber.Ctx) error {
 	for _, value := range m {
 		v := make(map[string]interface{})
 		value["order_id"] = order.OrderId
-		value["order_status"] = "processing"
-		value["can_cancel"] = true
+		// value["order_status"] = "processing"
+		// value["can_cancel"] = true
 		v["product_id"] = value["product_id"]
 
 		prods = append(prods, v)
