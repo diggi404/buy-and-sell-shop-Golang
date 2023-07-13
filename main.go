@@ -26,7 +26,8 @@ func main() {
 		fmt.Println(err.Error())
 		panic("failed to connect database!")
 	}
-	// db.Debug().AutoMigrate(&models.Cart{})
+	// db.Debug().AutoMigrate(&models.CreditCard{}, &models.BillingAddress{})
+	// db.Debug().AutoMigrate(&models.PurchasedItems{}, &models.Orders{}, &models.Shipment{})
 	handlers.DB = db
 
 	// api endpoints - Go Fiber

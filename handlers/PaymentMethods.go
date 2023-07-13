@@ -13,10 +13,8 @@ import (
 
 func AddCreditCard(req *fiber.Ctx) error {
 	// initialize some variables
-	userId := uint(validation.DecodedToken["id"].(float64))
-	var addresses models.AddressBook
-	var creditCard models.CreditCard
-	reqBody := new(models.AddCreditCard)
+	userId, reqBody := uint(validation.DecodedToken["id"].(float64)), new(models.AddCreditCard)
+
 	if err := req.BodyParser(reqBody); err != nil {
 		return err
 	}
@@ -50,16 +48,14 @@ func AddCreditCard(req *fiber.Ctx) error {
 				"msg": "your credit card number is invalid!",
 			})
 		}
-		err := card.Method()
-		if err != nil {
+		if err := card.Method(); err != nil {
 			return req.Status(400).JSON(fiber.Map{
 				"msg": "your credit card is invalid!",
 			})
 		}
 		rawLastFour, _ := card.LastFour()
-		cardType := card.Company.Short
 		lastFour, _ := strconv.ParseUint(rawLastFour, 10, 32)
-		maskedCC := masker.CreditCard(ccNum)
+		maskedCC, cardType := masker.CreditCard(ccNum), card.Company.Short
 		checkCard := DB.Where(&models.CreditCard{User_ID: userId, CardNumber: reqBody.CardNumber}).
 			Find(&models.CreditCard{})
 		if checkCard.Error != nil {
@@ -72,7 +68,8 @@ func AddCreditCard(req *fiber.Ctx) error {
 				"msg": "this card has already been saved to your account!",
 			})
 		}
-		newAddress := models.AddressBook{
+		newAddress := models.BillingAddress{
+			UserId:    userId,
 			FirstName: reqBody.Address.FirstName,
 			LastName:  reqBody.Address.LastName,
 			Address1:  reqBody.Address.Address1,
@@ -86,10 +83,9 @@ func AddCreditCard(req *fiber.Ctx) error {
 				"msg": "an error occurred!",
 			})
 		}
-		addressId := addresses.AddressId
-		creditCard = models.CreditCard{
+		creditCard := models.CreditCard{
 			User_ID:      userId,
-			AddressID:    addressId,
+			AddressID:    newAddress.AddressiD,
 			CardNumber:   reqBody.CardNumber,
 			CardMonth:    reqBody.CardMonth,
 			CardYear:     reqBody.CardYear,
@@ -145,9 +141,26 @@ func AddCreditCard(req *fiber.Ctx) error {
 			"msg": "this card has already been saved to your account!",
 		})
 	}
-	creditCard = models.CreditCard{
+	var addressBook models.AddressBook
+	var BillingAddress models.BillingAddress
+	getAddress := DB.Where(&models.AddressBook{AddressId: uint(addressId)}).First(&addressBook)
+	if getAddress.Error != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "address does not exists!",
+		})
+	}
+	newAddress := models.BillingAddress{
+		FirstName: addressBook.FirstName,
+		LastName:  addressBook.LastName,
+		Address1:  addressBook.Address1,
+		City:      addressBook.City,
+		State:     addressBook.State,
+		ZipCode:   addressBook.ZipCode,
+	}
+	DB.Create(&newAddress)
+	creditCard := models.CreditCard{
 		User_ID:      userId,
-		AddressID:    uint(addressId),
+		AddressID:    BillingAddress.AddressiD,
 		CardNumber:   reqBody.CardNumber,
 		CardMonth:    reqBody.CardMonth,
 		CardYear:     reqBody.CardYear,

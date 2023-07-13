@@ -99,21 +99,35 @@ type MobileMoney struct {
 	UpdatedAt time.Time `json:"-" gorm:"timestamp;not null"`
 }
 
+type BillingAddress struct {
+	AddressiD uint      `json:"-" gorm:"column:address_id;primaryKey;autoIncrement"`
+	UserId    uint      `json:"-" gorm:"column:user_id"`
+	User      User      `json:"-" gorm:"foreignKey:UserId"`
+	FirstName string    `json:"fname" gorm:"column:fname;not null"`
+	LastName  string    `json:"lname" gorm:"column:lname;not null"`
+	Address1  string    `json:"address1" gorm:"column:address1;not null"`
+	City      string    `json:"city" gorm:"column:city;not null"`
+	State     string    `json:"state" gorm:"column:state;notn null"`
+	ZipCode   string    `json:"zip_code" gorm:"column:zip_code;not null"`
+	CreatedAt time.Time `json:"-" gorm:"timestamp;not null"`
+	UpdatedAt time.Time `json:"-" gorm:"timestamp;not null"`
+}
+
 type CreditCard struct {
-	CardId       uint        `json:"card_id" gorm:"primaryKey;autoIncrement;column:card_id"`
-	User_ID      uint        `json:"-" gorm:"column:user_id;not null"`
-	User         User        `json:"-" gorm:"foreignKey:User_ID"`
-	AddressID    uint        `json:"address_id" gorm:"column:address_id;not null"`
-	CardNumber   uint        `json:"-" gorm:"column:card_number;not null"`
-	MaskedNumber string      `json:"masked_number" gorm:"column:masked_number;not null"`
-	CardMonth    uint        `json:"card_month" gorm:"column:card_month;not null"`
-	CardYear     uint        `json:"card_year" gorm:"column:card_year;not null"`
-	CardType     string      `json:"card_type" gorm:"column:card_type; not null"`
-	LastFour     uint        `json:"last_four" gorm:"column:last_four;not null"`
-	Address      AddressBook `json:"billing_address" gorm:"foreignKey:AddressID"`
-	IsDefault    bool        `json:"is_default" gorm:"column:is_default;default:false"`
-	CreatedAt    time.Time   `json:"-" gorm:"timestamp;not null"`
-	UpdatedAt    time.Time   `json:"-" gorm:"timestamp;not null"`
+	CardId       uint           `json:"card_id" gorm:"primaryKey;autoIncrement;column:card_id"`
+	User_ID      uint           `json:"-" gorm:"column:user_id;not null"`
+	User         User           `json:"-" gorm:"foreignKey:User_ID"`
+	AddressID    uint           `json:"address_id" gorm:"column:address_id;not null"`
+	CardNumber   uint           `json:"-" gorm:"column:card_number;not null"`
+	MaskedNumber string         `json:"masked_number" gorm:"column:masked_number;not null"`
+	CardMonth    uint           `json:"card_month" gorm:"column:card_month;not null"`
+	CardYear     uint           `json:"card_year" gorm:"column:card_year;not null"`
+	CardType     string         `json:"card_type" gorm:"column:card_type; not null"`
+	LastFour     uint           `json:"last_four" gorm:"column:last_four;not null"`
+	Address      BillingAddress `json:"billing_address" gorm:"foreignKey:AddressID"`
+	IsDefault    bool           `json:"is_default" gorm:"column:is_default;default:false"`
+	CreatedAt    time.Time      `json:"-" gorm:"timestamp;not null"`
+	UpdatedAt    time.Time      `json:"-" gorm:"timestamp;not null"`
 }
 
 type Shipment struct {
