@@ -26,9 +26,10 @@ func main() {
 		fmt.Println(err.Error())
 		panic("failed to connect database!")
 	}
-	// db.Debug().AutoMigrate(&models.Orders{}, &models.PurchasedItems{}, &models.Shipment{}, &models.Sellers{})
-	// db.Debug().AutoMigrate(&models.Products{}, &models.Cart{})
+	// db.Debug().AutoMigrate(&models.Cart{})
 	handlers.DB = db
+
+	// api endpoints - Go Fiber
 	app.Post("/auth/login", handlers.Login)
 	app.Post("/signup", handlers.Signup)
 	app.Get("/user/profile", validation.Authenticator, handlers.UserProfile)
@@ -55,5 +56,7 @@ func main() {
 	app.Get("/user/orders/in-progress", validation.Authenticator, handlers.GetInProgressItems)
 	app.Put("/user/orders/tracking/:item_id", validation.Authenticator, handlers.FixTrackingNumbers)
 
-	app.Listen(":3000")
+	if err := app.Listen(":3000"); err != nil {
+		log.Fatal(err)
+	}
 }

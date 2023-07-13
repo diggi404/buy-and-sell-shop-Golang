@@ -52,7 +52,7 @@ type CategoryOptions struct {
 }
 
 type Products struct {
-	UserID           uint            `json:"-" gorm:"column:user_id"`
+	UserID           uint            `json:"seller_id" gorm:"column:user_id"`
 	User             User            `json:"-" gorm:"foreignKey:UserID"`
 	ProductID        uint            `json:"product_id" gorm:"primaryKey;autoIncrement;column:product_id"`
 	ProductName      string          `json:"product_name" gorm:"varchar(255);not null"`
@@ -70,23 +70,13 @@ type Products struct {
 }
 
 type Cart struct {
-	CartItemId       uint      `json:"-" gorm:"primaryKey;autoIncrement;column:cart_item_id"`
-	Userid           uint      `json:"-" gorm:"column:user_id"`
-	User             User      `json:"-" gorm:"foreignKey:Userid"`
-	ProductId        uint      `json:"product_id" gorm:"column:product_id"`
-	Products         Products  `json:"-" gorm:"foreignKey:ProductId;constraint:OnDelete:CASCADE"`
-	SellerID         uint      `json:"seller_id" gorm:"column:seller_id"`
-	Seller           User      `json:"-" gorm:"foreignKey:SellerID"`
-	ProductName      string    `json:"product_name" gorm:"varchar(255);not null"`
-	ProductBrand     string    `json:"product_brand" gorm:"varchar(255);not null; column:product_brand"`
-	ProductCondition string    `json:"product_condition" gorm:"varchar(255);not null; conlumn:product_condition"`
-	ShoeSize         float32   `json:"shoe_size,omitempty" gorm:"column:shoe_size"`
-	ClothSize        string    `json:"cloth_size,omitempty" gorm:"varchar(50); column:cloth_size"`
-	Color            string    `json:"color,omitempty" gorm:"varchar(100); column:color"`
-	Price            float32   `json:"price" gorm:"not null; column:price"`
-	CreatedAt        time.Time `json:"-" gorm:"timestamp;not null"`
-	Likes            int       `json:"likes" gorm:"column:likes;not null;default:0"`
-	UpdatedAt        time.Time `json:"-" gorm:"timestamp;not null"`
+	CartItemId uint      `json:"-" gorm:"primaryKey;autoIncrement;column:cart_item_id"`
+	Userid     uint      `json:"-" gorm:"column:user_id"`
+	User       User      `json:"-" gorm:"foreignKey:Userid"`
+	ProductId  uint      `json:"product_id" gorm:"column:product_id"`
+	Products   Products  `json:"product" gorm:"foreignKey:ProductId;constraint:OnDelete:CASCADE"`
+	CreatedAt  time.Time `json:"-" gorm:"timestamp;not null"`
+	UpdatedAt  time.Time `json:"-" gorm:"timestamp;not null"`
 }
 
 type TotalCart struct {

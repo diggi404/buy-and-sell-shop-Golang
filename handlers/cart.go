@@ -3,7 +3,6 @@ package handlers
 import (
 	"Users/diggi/Documents/Go_tutorials/models"
 	"Users/diggi/Documents/Go_tutorials/validation"
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -21,7 +20,7 @@ func GenID() int {
 func AddToCart(req *fiber.Ctx) error {
 	userId := uint(validation.DecodedToken["id"].(float64))
 	if len(req.Params("product_id")) == 0 {
-		req.Status(400).JSON(fiber.Map{
+		return req.Status(400).JSON(fiber.Map{
 			"msg": "product_id is required!",
 		})
 	}
@@ -29,8 +28,7 @@ func AddToCart(req *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	products := new(models.Products)
-	productId := uint(num)
+	products, productId := new(models.Products), uint(num)
 	//check if product exists before adding to cart
 	if getProduct := DB.First(&products, productId).Error; getProduct != nil {
 		return req.Status(400).JSON(fiber.Map{
@@ -80,17 +78,8 @@ func AddToCart(req *fiber.Ctx) error {
 	likes := products.ItemLikes + 1
 	DB.Model(&models.Products{}).Where(&models.Products{ProductID: productId}).Update("likes", likes)
 	addCart := models.Cart{
-		Userid:           userId,
-		ProductId:        products.ProductID,
-		SellerID:         products.UserID,
-		ProductName:      products.ProductName,
-		ProductBrand:     products.ProductBrand,
-		ProductCondition: products.ProductCondition,
-		ShoeSize:         products.ShoeSize,
-		ClothSize:        products.ClothSize,
-		Color:            products.Color,
-		Price:            products.Price,
-		Likes:            likes,
+		Userid:    userId,
+		ProductId: products.ProductID,
 	}
 
 	//insert new item to cart
@@ -101,7 +90,7 @@ func AddToCart(req *fiber.Ctx) error {
 	}
 	//Get the list of item in the user's cart
 	var cart []models.Cart
-	if getCart := DB.Where(&models.Cart{Userid: userId}).Find(&cart).Error; getCart != nil {
+	if getCart := DB.Preload("Products").Where(&models.Cart{Userid: userId}).Find(&cart).Error; getCart != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "an error occurred!",
 		})
@@ -109,7 +98,7 @@ func AddToCart(req *fiber.Ctx) error {
 	//calculate the total price of items in the user's cart
 	var totalPrice float32
 	for _, value := range cart {
-		totalPrice += value.Price
+		totalPrice += value.Products.Price
 	}
 	// Save total price and cart id to total_carts_table
 	if saveCartInfo := DB.Save(&models.TotalCart{
@@ -132,9 +121,11 @@ func AddToCart(req *fiber.Ctx) error {
 
 func GetCart(req *fiber.Ctx) error {
 	userId := uint(validation.DecodedToken["id"].(float64))
-	var cart []models.Cart
-	var user models.User
-	getCart := DB.Where(&models.Cart{Userid: userId}).Find(&cart)
+	var (
+		cart []models.Cart
+		user models.User
+	)
+	getCart := DB.Preload("Products").Where(&models.Cart{Userid: userId}).Find(&cart)
 	if getCart.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "an error occurred!",
@@ -146,7 +137,7 @@ func GetCart(req *fiber.Ctx) error {
 		})
 	}
 	if getCartId := DB.Select("cart_id").First(&user, userId).Error; getCartId != nil {
-		req.Status(400).JSON(fiber.Map{
+		return req.Status(400).JSON(fiber.Map{
 			"msg": "your cart is empty",
 		})
 	}
@@ -154,7 +145,7 @@ func GetCart(req *fiber.Ctx) error {
 	var totalPrice float32
 	cartId := user.CartId
 	for _, value := range cart {
-		totalPrice += value.Price
+		totalPrice += value.Products.Price
 	}
 	response := models.CartResponse{
 		CartId:     cartId,
@@ -177,17 +168,26 @@ func DeleteCartItem(req *fiber.Ctx) error {
 	}
 	productId := uint(num)
 	var delCart models.Cart
-	deleteItem := DB.Clauses(clause.Returning{}).Where(&models.Cart{Userid: userId, ProductId: productId}).Delete(&delCart)
+
+	// delete the item in the cart
+	deleteItem := DB.Clauses(clause.Returning{}).
+		Where(&models.Cart{Userid: userId, ProductId: productId}).
+		Delete(&delCart)
 	if deleteItem.RowsAffected == 0 {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "this product does not exists in your cart!",
 		})
 	}
-	likes := delCart.Likes - 1
-	fmt.Println(likes)
-	DB.Model(&models.Products{}).Where(&models.Products{ProductID: productId}).Update("likes", likes)
-	var cart []models.Cart
-	var user models.User
+
+	// update likes count
+	likes := delCart.Products.ItemLikes - 1
+	DB.Model(&models.Products{}).
+		Where(&models.Products{ProductID: productId}).
+		Update("likes", likes)
+	var (
+		cart []models.Cart
+		user models.User
+	)
 	getCart := DB.Preload("Products").Where(&models.Cart{Userid: userId}).Find(&cart)
 	if getCart.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
@@ -208,7 +208,7 @@ func DeleteCartItem(req *fiber.Ctx) error {
 	var totalPrice float32
 	cartId := user.CartId
 	for _, value := range cart {
-		totalPrice = totalPrice + value.Price
+		totalPrice = totalPrice + value.Products.Price
 	}
 
 	response := models.CartResponse{

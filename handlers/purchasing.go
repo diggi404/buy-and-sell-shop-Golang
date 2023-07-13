@@ -25,7 +25,7 @@ func Checkout(req *fiber.Ctx) error {
 	if errors != nil {
 		return req.Status(400).JSON(errors)
 	}
-	checkEmtpyCart := DB.Where(&models.Cart{Userid: userId}).Find(&cart)
+	checkEmtpyCart := DB.Preload("Products").Where(&models.Cart{Userid: userId}).Find(&cart)
 	if checkEmtpyCart.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "an error occurred!",
@@ -80,17 +80,19 @@ func Checkout(req *fiber.Ctx) error {
 		})
 	}
 	var (
-		m       []map[string]interface{}
-		prods   []map[string]interface{}
-		prodIds []models.Products
+		m        []map[string]interface{}
+		prods    []map[string]interface{}
+		prodIds  []models.Products
+		products []models.Products
 	)
-	cartByte, _ := json.Marshal(cart)
+	for _, c := range cart {
+		products = append(products, c.Products)
+	}
+	cartByte, _ := json.Marshal(products)
 	json.Unmarshal(cartByte, &m)
 	for _, value := range m {
 		v := make(map[string]interface{})
 		value["order_id"] = order.OrderId
-		// value["order_status"] = "processing"
-		// value["can_cancel"] = true
 		v["product_id"] = value["product_id"]
 
 		prods = append(prods, v)
@@ -113,9 +115,11 @@ func Checkout(req *fiber.Ctx) error {
 			"msg": "an error occurred. Please try again!",
 		})
 	}
-	var tempShipmentMap []map[string]interface{}
-	var shipmentMap []map[string]interface{}
-	var shipment []models.Shipment
+	var (
+		tempShipmentMap []map[string]interface{}
+		shipmentMap     []map[string]interface{}
+		shipment        []models.Shipment
+	)
 	itemsByte, _ := json.Marshal(items)
 	json.Unmarshal(itemsByte, &tempShipmentMap)
 	for _, item := range tempShipmentMap {

@@ -32,7 +32,8 @@ func GetUserOrders(req *fiber.Ctx) error {
 func GetInProgressItems(req *fiber.Ctx) error {
 	userId := validation.DecodedToken["id"].(float64)
 	var items []models.PurchasedItems
-	getItems := DB.Where(&models.PurchasedItems{SellerId: uint(userId), OrderStatus: "processing"}).Preload("Shipment").Find(&items)
+	getItems := DB.Preload("Seller").Where(&models.PurchasedItems{SellerId: uint(userId), OrderStatus: "processing"}).
+		Preload("Shipment").Find(&items)
 	if getItems.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "an error occurred!",
@@ -65,7 +66,9 @@ func FixTrackingNumbers(req *fiber.Ctx) error {
 		TrackingNumber: reqBody.TrackingNumber,
 		Carrier:        reqBody.Carrier,
 	}
-	updateTracking := DB.Model(&models.Shipment{}).Where(&models.Shipment{ItemId: uint(itemId)}).Updates(tracking)
+	updateTracking := DB.Model(&models.Shipment{}).
+		Where(&models.Shipment{ItemId: uint(itemId)}).
+		Updates(tracking)
 	if updateTracking.RowsAffected == 0 {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "an error occurred. Please try again!",
