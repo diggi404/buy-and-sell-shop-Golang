@@ -1,0 +1,71 @@
+package usersettings
+
+import (
+	"Users/diggi/Documents/Go_tutorials/handlers"
+	"Users/diggi/Documents/Go_tutorials/models"
+	"Users/diggi/Documents/Go_tutorials/validation"
+	"fmt"
+	"math/rand"
+	"strconv"
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"gopkg.in/gomail.v2"
+	"gorm.io/gorm"
+)
+
+func GenOtp() int {
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	randomInt := 100000 + rand.Intn(900000)
+	return randomInt
+}
+
+func UpdateEmail(req *fiber.Ctx) error {
+	var user models.User
+	userId := uint(validation.DecodedToken["id"].(float64))
+	getEmail := handlers.DB.Where(&models.User{ID: userId}).First(&user)
+	if getEmail.Error != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "user does not exists!",
+		})
+	}
+	mailer := gomail.NewMessage()
+	mailer.SetAddressHeader("From", "karianfavreau9@gmail.com", "Tradex")
+	mailer.SetAddressHeader("To", user.Email, "")
+	mailer.SetHeader("Subject", "Confirm Email Update")
+	otp := GenOtp()
+	fmt.Println(otp)
+	mailer.SetBody("text/plain", "Here is your code "+strconv.Itoa(otp)+" to verify your email update. Code expires in 10 min")
+	if err := handlers.Smtp.DialAndSend(mailer); err != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "an error occurred. Mail cannot be sent!",
+		})
+	}
+	otpCreds := models.OtpEmail{
+		UserId:    userId,
+		Value:     otp,
+		Email:     user.Email,
+		ExpiresAt: time.Now().Add(time.Minute * 2),
+	}
+	fmt.Println(time.Now().Add(time.Minute * 2))
+	err := handlers.DB.Transaction(func(tx *gorm.DB) error {
+		updateRequest := tx.Model(&models.User{}).
+			Where(&models.User{ID: userId}).
+			Update("email_update_requested", true)
+		if updateRequest.RowsAffected == 0 {
+			return updateRequest.Error
+		}
+		if err := tx.Create(&otpCreds).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return req.Status(400).JSON(fiber.Map{
+			"msg": "an error occurred. Please try again!",
+		})
+	}
+	return req.Status(201).JSON(fiber.Map{
+		"msg": "Code has been sent to your email. Please verify to proceed!",
+	})
+}

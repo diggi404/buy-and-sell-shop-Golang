@@ -12,6 +12,7 @@ type User struct {
 	CartId               uint          `gorm:"column:cart_id;unique"`
 	Closed               bool          `gorm:"not null;default:false"`
 	DefaultPaymentMethod uint          `json:"default_payment_method" gorm:"column:default_payment_method;unique"`
+	EmailUpdateRequested bool          `json:"email_update_requested" gorm:"column:email_update_requested;default:false"`
 	CreatedAt            time.Time     `json:"-" gorm:"timestamp;not null"`
 	UpdatedAt            time.Time     `json:"-" gorm:"timestamp;not null"`
 	CreditCards          []CreditCard  `json:"credit_cards"`
@@ -173,8 +174,19 @@ type Orders struct {
 }
 
 type Sellers struct {
-	UserID uint   `json:"user_id" gorm:"primaryKey;column:user_id"`
-	Seller User   `json:"-" gorm:"foreignKey:UserID"`
-	Name   string `json:"name" gorm:"column:name"`
-	Email  string `json:"email" gorm:"column:email;unique"`
+	UserID    uint      `json:"user_id" gorm:"primaryKey;column:user_id"`
+	Seller    User      `json:"-" gorm:"foreignKey:UserID"`
+	Name      string    `json:"name" gorm:"column:name"`
+	Email     string    `json:"email" gorm:"column:email;unique"`
+	CreatedAt time.Time `json:"-" gorm:"timestamp;not null"`
+	UpdatedAt time.Time `json:"-" gorm:"timestamp;not null"`
+}
+
+type OtpEmail struct {
+	UserId    uint      `json:"user_id" gorm:"primaryKey;column:user_id"`
+	User      User      `json:"-" gorm:"foreignKey:UserId"`
+	Value     int       `json:"value" gorm:"column:value;not null"`
+	Email     string    `json:"email" gorm:"column:email;not null"`
+	CreatedAt time.Time `json:"-" gorm:"timestamp;not null"`
+	ExpiresAt time.Time `json:"-" gorm:"timestamp;not null"`
 }

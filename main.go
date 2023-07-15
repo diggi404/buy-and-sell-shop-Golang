@@ -3,6 +3,7 @@ package main
 import (
 	"Users/diggi/Documents/Go_tutorials/handlers"
 	populatedb "Users/diggi/Documents/Go_tutorials/handlers/populateDB"
+	usersettings "Users/diggi/Documents/Go_tutorials/handlers/userSettings"
 	"Users/diggi/Documents/Go_tutorials/validation"
 	"fmt"
 	"log"
@@ -26,14 +27,14 @@ func main() {
 		fmt.Println(err.Error())
 		panic("failed to connect database!")
 	}
-	// db.Debug().AutoMigrate(&models.CreditCard{}, &models.BillingAddress{})
-	// db.Debug().AutoMigrate(&models.PurchasedItems{}, &models.Orders{}, &models.Shipment{})
+	// db.Debug().AutoMigrate(&models.User{}, &models.OtpEmail{})
 	handlers.DB = db
-
+	handlers.ConnectSmtp()
 	// api endpoints - Go Fiber
 	app.Post("/auth/login", handlers.Login)
 	app.Post("/signup", handlers.Signup)
 	app.Get("/user/profile", validation.Authenticator, handlers.UserProfile)
+	app.Put("/user/email", validation.Authenticator, usersettings.UpdateEmail)
 	app.Post("/user/create/address", validation.Authenticator, handlers.CreteAddressBook)
 	app.Get("/user/address/", validation.Authenticator, handlers.GetAddressBook)
 	app.Put("/user/update/address/:address_id", validation.Authenticator, handlers.UpdateAddressBook)
