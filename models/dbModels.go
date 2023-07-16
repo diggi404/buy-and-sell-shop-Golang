@@ -12,7 +12,7 @@ type User struct {
 	CartId               uint          `gorm:"column:cart_id;unique"`
 	Closed               bool          `gorm:"not null;default:false"`
 	DefaultPaymentMethod uint          `json:"default_payment_method" gorm:"column:default_payment_method;unique"`
-	EmailUpdateRequested bool          `json:"email_update_requested" gorm:"column:email_update_requested;default:false"`
+	ResetRequested       bool          `json:"reset_requested" gorm:"column:reset_requested;default:false"`
 	CreatedAt            time.Time     `json:"-" gorm:"timestamp;not null"`
 	UpdatedAt            time.Time     `json:"-" gorm:"timestamp;not null"`
 	CreditCards          []CreditCard  `json:"credit_cards"`

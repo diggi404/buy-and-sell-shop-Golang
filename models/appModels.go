@@ -90,3 +90,7 @@ type CreditCardCheckout struct {
 	TotalPrice float32 `json:"total_price" validate:"required"`
 	CardId     uint    `json:"card_id" validate:"required"`
 }
+
+type VerifyCode struct {
+	Code int `json:"code" validate:"required,number,min=100000,max=999999"`
+}

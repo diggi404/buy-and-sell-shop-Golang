@@ -4,7 +4,6 @@ import (
 	"Users/diggi/Documents/Go_tutorials/handlers"
 	"Users/diggi/Documents/Go_tutorials/models"
 	"Users/diggi/Documents/Go_tutorials/validation"
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -33,9 +32,8 @@ func UpdateEmail(req *fiber.Ctx) error {
 	mailer.SetAddressHeader("From", "karianfavreau9@gmail.com", "Tradex")
 	mailer.SetAddressHeader("To", user.Email, "")
 	mailer.SetHeader("Subject", "Confirm Email Update")
-	otp := GenOtp()
-	fmt.Println(otp)
-	mailer.SetBody("text/plain", "Here is your code "+strconv.Itoa(otp)+" to verify your email update. Code expires in 10 min")
+	otpCode := GenOtp()
+	mailer.SetBody("text/plain", strconv.Itoa(otpCode)+"\nUse this code to verify your email update. Code expires in 10 min")
 	if err := handlers.Smtp.DialAndSend(mailer); err != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "an error occurred. Mail cannot be sent!",
@@ -43,26 +41,26 @@ func UpdateEmail(req *fiber.Ctx) error {
 	}
 	otpCreds := models.OtpEmail{
 		UserId:    userId,
-		Value:     otp,
+		Value:     otpCode,
 		Email:     user.Email,
 		ExpiresAt: time.Now().Add(time.Minute * 2),
 	}
-	fmt.Println(time.Now().Add(time.Minute * 2))
 	err := handlers.DB.Transaction(func(tx *gorm.DB) error {
-		updateRequest := tx.Model(&models.User{}).
-			Where(&models.User{ID: userId}).
-			Update("email_update_requested", true)
-		if updateRequest.RowsAffected == 0 {
-			return updateRequest.Error
+		checkOtp := handlers.DB.Where(&models.OtpEmail{UserId: userId}).First(&models.OtpEmail{})
+		if checkOtp.Error != nil {
+			handlers.DB.Create(&otpCreds)
+			return nil
 		}
-		if err := tx.Create(&otpCreds).Error; err != nil {
-			return err
+		updateOtp := handlers.DB.Where(&models.OtpEmail{UserId: userId}).
+			Update("value", otpCode)
+		if updateOtp.RowsAffected == 0 {
+			return updateOtp.Error
 		}
 		return nil
 	})
 	if err != nil {
 		return req.Status(400).JSON(fiber.Map{
-			"msg": "an error occurred. Please try again!",
+			"msg": "an error occurred.Please try again later",
 		})
 	}
 	return req.Status(201).JSON(fiber.Map{

@@ -35,6 +35,7 @@ func main() {
 	app.Post("/signup", handlers.Signup)
 	app.Get("/user/profile", validation.Authenticator, handlers.UserProfile)
 	app.Put("/user/email", validation.Authenticator, usersettings.UpdateEmail)
+	app.Post("/user/email/code", validation.Authenticator, usersettings.VerifyEmailOtp)
 	app.Post("/user/create/address", validation.Authenticator, handlers.CreteAddressBook)
 	app.Get("/user/address/", validation.Authenticator, handlers.GetAddressBook)
 	app.Put("/user/update/address/:address_id", validation.Authenticator, handlers.UpdateAddressBook)

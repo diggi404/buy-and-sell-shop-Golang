@@ -6,6 +6,7 @@ require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/danhper/structomap v0.6.2 // indirect
 	github.com/durango/go-credit-card v0.0.0-20220404131259-a9e175ba4082 // indirect
+	github.com/fatih/color v1.15.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/ggwhite/go-masker v1.0.9 // indirect
