@@ -228,14 +228,14 @@ func MakeCardDefault(req *fiber.Ctx) error {
 			"msg": "required parameter is missing!",
 		})
 	}
-	card_id, err := strconv.ParseUint(req.Params("card_id"), 10, 32)
+	cardId, err := strconv.ParseUint(req.Params("card_id"), 10, 32)
 	if err != nil {
 		return err
 	}
 
 	checkCard := DB.Where(&models.CreditCard{
 		User_ID: userId,
-		CardId:  uint(card_id),
+		CardId:  uint(cardId),
 	}).
 		First(&models.CreditCard{})
 	if checkCard.Error != nil {
@@ -245,7 +245,7 @@ func MakeCardDefault(req *fiber.Ctx) error {
 	}
 	makeDefault := DB.Model(&models.User{}).
 		Where(&models.User{ID: uint(userId)}).
-		Update("default_payment_method", card_id)
+		Update("default_payment_method", cardId)
 	if makeDefault.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
 			"msg": "error making card default!",
@@ -265,7 +265,7 @@ func MakeCardDefault(req *fiber.Ctx) error {
 		})
 	}
 	setDefault := DB.Model(&models.CreditCard{}).
-		Where(&models.CreditCard{CardId: uint(card_id)}).
+		Where(&models.CreditCard{CardId: uint(cardId)}).
 		Update("is_default", true)
 	if setDefault.Error != nil {
 		return req.Status(400).JSON(fiber.Map{
