@@ -36,6 +36,11 @@ func Login(req *fiber.Ctx) error {
 			"msg": "invalid email or password!",
 		})
 	}
+	if !authUser.EmailVerified {
+		return req.Status(401).JSON(fiber.Map{
+			"msg": "Your email is not yet verified! Kindly check your mail inbox to proceed!",
+		})
+	}
 	if checkHash := validation.CheckPasswordHash(reqBody.Password, authUser.Password); !checkHash {
 		return req.Status(401).JSON(fiber.Map{
 			"msg": "invalid email or password!",

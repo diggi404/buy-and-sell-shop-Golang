@@ -83,6 +83,7 @@ func AddCreditCard(req *fiber.Ctx) error {
 				"msg": "an error occurred!",
 			})
 		}
+
 		creditCard := models.CreditCard{
 			User_ID:      userId,
 			AddressID:    newAddress.AddressiD,

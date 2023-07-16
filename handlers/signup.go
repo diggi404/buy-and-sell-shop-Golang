@@ -4,12 +4,13 @@ import (
 	"Users/diggi/Documents/Go_tutorials/models"
 	"Users/diggi/Documents/Go_tutorials/validation"
 	"log"
-	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
+	uuid "github.com/uuid6/uuid6go-proto"
+	"gopkg.in/gomail.v2"
+	"gorm.io/gorm/clause"
 )
 
 func Signup(req *fiber.Ctx) error {
@@ -30,28 +31,35 @@ func Signup(req *fiber.Ctx) error {
 	checkUser := DB.Where(&models.User{Email: reqBody.Email}).First(&models.User{})
 	if checkUser.Error != nil {
 		hash, _ := validation.HashPassword(reqBody.Password)
-		results := DB.Create(&models.User{Name: reqBody.Name, Email: reqBody.Email, Password: hash})
+		authUser = &models.User{Name: reqBody.Name, Email: reqBody.Email, Password: hash}
+		results := DB.Clauses(clause.Returning{}).Create(&authUser)
 		if results.Error != nil {
 			return req.Status(400).JSON(fiber.Map{
 				"msg": "signup failed!",
 			})
 		}
-		payload := &jwt.MapClaims{
-			"id":    authUser.ID,
-			"email": authUser.Email,
-			"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		var gen uuid.UUIDv7Generator
+		gen.SubsecondPrecisionLength = 20
+		link := gen.Next().ToString()
+		mailer := gomail.NewMessage()
+		mailer.SetAddressHeader("From", "karianfavreau9@gmail.com", "Tradex")
+		mailer.SetAddressHeader("To", authUser.Email, "")
+		mailer.SetHeader("Subject", "Confirm Your Email Address")
+		mailBody := "click on this link below to confirm your email address\nhttp://localhost:3000/verify/email/" + link + "\nLink is valid for only 24 hours"
+		mailer.SetBody("text/plain", mailBody)
+		if err := Smtp.DialAndSend(mailer); err != nil {
+			return err
 		}
-		token, err := validation.GenerateJwt(os.Getenv("SECRET_KEY"), payload)
-		if err != nil {
-			return req.Status(400).JSON(fiber.Map{
-				"msg": "error generating token!",
-			})
-		}
+		DB.Create(&models.EmailVerify{
+			UserId:    authUser.ID,
+			Link:      link,
+			ExpiresAt: time.Now().Add(time.Hour * 24),
+		})
 		return req.Status(201).JSON(fiber.Map{
-			"access_token": token,
+			"msg": "Check your inbox or junk for a link to confirm your email address",
 		})
 	}
 	return req.Status(400).JSON(fiber.Map{
-		"msg": "user already exists!",
+		"msg": "user already exists. Please login!",
 	})
 }

@@ -14,6 +14,9 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.1 // indirect
 	github.com/gofiber/fiber/v2 v2.47.0 // indirect
+	github.com/gofiber/template v1.8.2 // indirect
+	github.com/gofiber/template/html/v2 v2.0.5 // indirect
+	github.com/gofiber/utils v1.1.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
@@ -35,6 +38,7 @@ require (
 	github.com/savsgio/dictpool v0.0.0-20221023140959-7bf2e61cea94 // indirect
 	github.com/savsgio/gotils v0.0.0-20230208104028-c358bd845dee // indirect
 	github.com/tinylib/msgp v1.1.8 // indirect
+	github.com/uuid6/uuid6go-proto v0.2.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.47.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

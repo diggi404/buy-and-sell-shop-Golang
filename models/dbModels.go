@@ -9,14 +9,22 @@ type User struct {
 	Name                 string        `gorm:"type:varchar(100);not null"`
 	Email                string        `gorm:"type:varchar(255);not null;unique"`
 	Password             string        `json:"-" gorm:"type:varchar(255);not null"`
-	CartId               uint          `gorm:"column:cart_id;unique"`
 	Closed               bool          `gorm:"not null;default:false"`
 	DefaultPaymentMethod uint          `json:"default_payment_method" gorm:"column:default_payment_method;unique"`
 	ResetRequested       bool          `json:"reset_requested" gorm:"column:reset_requested;default:false"`
+	EmailVerified        bool          `json:"email_verified" gorm:"column:email_verified;not null;default:false"`
 	CreatedAt            time.Time     `json:"-" gorm:"timestamp;not null"`
 	UpdatedAt            time.Time     `json:"-" gorm:"timestamp;not null"`
 	CreditCards          []CreditCard  `json:"credit_cards"`
 	Momo                 []MobileMoney `json:"momo"`
+}
+
+type EmailVerify struct {
+	UserId    uint      `json:"user_id" gorm:"column:user_id;primaryKey"`
+	User      User      `json:"-" gorm:"foreignKey:UserId"`
+	Link      string    `json:"link" gorm:"column:link;not null;unique"`
+	CreatedAt time.Time `json:"-" gorm:"timestamp;not null"`
+	ExpiresAt time.Time `json:"-" gorm:"timestamp;not null"`
 }
 
 type AddressBook struct {
@@ -82,7 +90,6 @@ type Cart struct {
 
 type TotalCart struct {
 	CartID     uint      `json:"cart_id" gorm:"primaryKey;column:cart_id"`
-	User       User      `json:"-" gorm:"foreignKey:CartID;references:CartId"`
 	User_Id    uint      `json:"user_id" gorm:"column:user_id;not null;unique"`
 	NewUser    User      `json:"-" gorm:"foreignKey:User_Id"`
 	TotalPrice float32   `json:"total_price" gorm:"column:total_price"`
