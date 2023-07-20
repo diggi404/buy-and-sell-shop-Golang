@@ -10,10 +10,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
+var Rds *redis.Client
 
 func Login(req *fiber.Ctx) error {
 	err := godotenv.Load()

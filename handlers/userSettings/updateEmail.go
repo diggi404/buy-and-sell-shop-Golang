@@ -67,3 +67,24 @@ func UpdateEmail(req *fiber.Ctx) error {
 		"msg": "Code has been sent to your email. Please verify to proceed!",
 	})
 }
+
+// func ResendCode(req *fiber.Ctx) error {
+// 	userId := uint(validation.DecodedToken["id"].(float64))
+// 	findUser := handlers.DB.Where(&models.EmailVerify{UserId: userId}).First(&models.EmailVerify{})
+// 	if findUser.Error != nil {
+// 		return req.Status(400).JSON(fiber.Map{
+// 			"msg": "user has not requested for email update!",
+// 		})
+// 	}
+// 	mailer := gomail.NewMessage()
+// 	mailer.SetAddressHeader("From", "karianfavreau9@gmail.com", "Tradex")
+// 	mailer.SetAddressHeader("To", user.Email, "")
+// 	mailer.SetHeader("Subject", "Confirm Email Update")
+// 	otpCode := GenOtp()
+// 	mailer.SetBody("text/plain", strconv.Itoa(otpCode)+"\nUse this code to verify your email update. Code expires in 10 min")
+// 	if err := handlers.Smtp.DialAndSend(mailer); err != nil {
+// 		return req.Status(400).JSON(fiber.Map{
+// 			"msg": "an error occurred. Mail cannot be sent!",
+// 		})
+// 	}
+// }

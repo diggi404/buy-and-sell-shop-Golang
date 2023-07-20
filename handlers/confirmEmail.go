@@ -11,7 +11,7 @@ import (
 func ConfirmEmail(req *fiber.Ctx) error {
 	if len(req.Params("link")) == 0 {
 		return req.Status(400).JSON(fiber.Map{
-			"msg": "required paramet is missing!",
+			"msg": "required parameter is missing!",
 		})
 	}
 	var link models.EmailVerify

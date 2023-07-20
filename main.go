@@ -2,6 +2,7 @@ package main
 
 import (
 	"Users/diggi/Documents/Go_tutorials/handlers"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -30,6 +32,17 @@ func main() {
 	}
 	// db.Debug().AutoMigrate(&models.User{}, &models.EmailVerify{})
 	handlers.DB = db
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "temp-redis.redis.cache.windows.net:6379",
+		Password: "XcSYdtzZpmrBVDEfW7hwpissobhvXrvArAzCaPXmxUM=",
+		DB:       0,
+	})
+	er := rdb.Ping(ctx)
+	if er != nil {
+		fmt.Println(er)
+	}
+	handlers.Rds = rdb
 	handlers.ConnectSmtp()
 
 	// register routes
