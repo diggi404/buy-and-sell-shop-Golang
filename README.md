@@ -1,6 +1,6 @@
 # buy-and-sell-shop [TRADEX]
 
-> This is a demo ecommerce backend so no payment apis were implemented.
+> This is a demo ecommerce backend using fiber framework so no payment apis were implemented.
 
 ### Shop Featuers
 
