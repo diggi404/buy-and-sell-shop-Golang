@@ -6,7 +6,7 @@
 
 - Users can
 
-  - signup
+  - signup [email verification required]
   - login
   - update their email [OTP Required]
   - create address book
